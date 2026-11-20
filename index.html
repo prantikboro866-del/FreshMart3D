@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7f2">
+  <title>FreshMart 3D — A little more life in every aisle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #2e9e5b;
+      --green-dark: #177444;
+      --green-soft: #e9f6ec;
+      --ink: #1c2b21;
+      --muted: #748078;
+      --paper: #fff;
+      --orange: #f29a4a;
+      --line: #e8ede8;
+      --shadow: 0 16px 55px rgba(27, 46, 34, .15);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { color: var(--ink); background: #edf2eb; font-family: "DM Sans", sans-serif; }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    :focus-visible { outline: 3px solid rgba(46,158,91,.55); outline-offset: 3px; }
+
+    #scene { position: fixed; inset: 0; z-index: 0; }
+    #scene canvas { display: block; width: 100%; height: 100%; outline: 0; touch-action: none; }
+    .vignette {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, rgba(14,32,20,.17) 0%, transparent 19%, transparent 73%, rgba(12,27,18,.2) 100%);
+    }
+    .hud { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+    .hud button, .hud input, .hud select, .hud a { pointer-events: auto; }
+    .topbar {
+      position: absolute; top: 20px; left: 22px; right: 22px; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 15px 0 18px; border: 1px solid rgba(255,255,255,.72);
+      border-radius: 20px; background: rgba(255,255,255,.94);
+      box-shadow: 0 8px 34px rgba(27,46,34,.10); backdrop-filter: blur(15px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 185px; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px;
+      color: #fff; background: var(--green); box-shadow: 0 5px 12px rgba(46,158,91,.25);
+    }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .brand-copy { line-height: 1.05; }
+    .brand-name { font: 800 17px Manrope, sans-serif; letter-spacing: -.7px; }
+    .brand-name span { color: var(--green); }
+    .brand-tag { margin-top: 4px; color: #8a968e; font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+    .store-status {
+      display: flex; align-items: center; gap: 8px; color: #667269;
+      font-size: 12px; font-weight: 600;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #49bf73; box-shadow: 0 0 0 4px #e6f7eb; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-button, .cart-button {
+      height: 42px; border: 1px solid var(--line); background: #fff; cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .icon-button:hover, .cart-button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(22,51,31,.1); }
+    .icon-button { width: 42px; border-radius: 13px; display: grid; place-items: center; color: #65756a; }
+    .icon-button svg { width: 18px; height: 18px; }
+    .cart-button {
+      min-width: 112px; padding: 0 12px; border-radius: 13px; display: flex; align-items: center;
+      justify-content: center; gap: 8px; color: #fff; border-color: var(--green); background: var(--green);
+      font-size: 12px; font-weight: 700;
+    }
+    .cart-button:hover { background: var(--green-dark); }
+    .cart-button svg { width: 17px; height: 17px; }
+    .cart-count {
+      display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%;
+      color: var(--green-dark); background: #fff; font-size: 11px; font-weight: 800;
+    }
+
+    .left-rail {
+      position: absolute; top: 102px; left: 22px; width: 278px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .search-card, .guide-card, .hint-card {
+      border: 1px solid rgba(255,255,255,.8); border-radius: 18px;
+      background: rgba(255,255,255,.94); box-shadow: 0 10px 32px rgba(27,46,34,.10);
+      backdrop-filter: blur(14px);
+    }
+    .search-card { padding: 15px; }
+    .eyebrow { color: #93a096; font-size: 9px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+    .search-title { margin: 5px 0 12px; font: 800 16px Manrope, sans-serif; letter-spacing: -.45px; }
+    .search-box {
+      height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 10px;
+      border: 1px solid #e8eee8; border-radius: 11px; background: #f8faf7;
+    }
+    .search-box svg { width: 16px; height: 16px; flex: 0 0 auto; color: #9aa79d; }
+    .search-box input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 12px; }
+    .search-box input::placeholder { color: #a4aea7; }
+    .search-box button {
+      width: 32px; height: 32px; flex: 0 0 auto; border: 0; border-radius: 9px;
+      color: #fff; background: var(--green); cursor: pointer; font-size: 18px; line-height: 1;
+    }
+    .search-results { display: none; margin-top: 7px; max-height: 190px; overflow: auto; }
+    .search-results.open { display: block; }
+    .search-result {
+      width: 100%; min-height: 44px; display: flex; align-items: center; gap: 9px; padding: 9px 5px;
+      border: 0; border-bottom: 1px solid #f0f3f0; text-align: left; background: transparent; cursor: pointer;
+    }
+    .search-result:hover { border-radius: 9px; background: #f5f8f4; }
+    .search-result:last-child { border-bottom: 0; }
+    .result-swatch { width: 27px; height: 27px; border-radius: 9px; flex: 0 0 auto; }
+    .result-copy { min-width: 0; flex: 1; }
+    .result-name { overflow: hidden; color: #39483e; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .result-category { margin-top: 2px; color: #94a097; font-size: 9px; }
+    .result-price { color: var(--green-dark); font-size: 11px; font-weight: 800; }
+    .no-results { padding: 10px 4px 3px; color: var(--muted); font-size: 11px; }
+    .filter-row { display: flex; align-items: center; justify-content: space-between; gap: 7px; margin-top: 12px; }
+    .filter-row label { color: #849087; font-size: 10px; font-weight: 700; }
+    .filter-row select {
+      max-width: 155px; padding: 6px 24px 6px 9px; border: 1px solid #e8eee8;
+      border-radius: 8px; outline: 0; color: #536057; background: #fff; font-size: 10px;
+    }
+
+    .guide-card { padding: 14px 14px 12px; }
+    .guide-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .guide-title { font: 800 13px Manrope, sans-serif; }
+    .guide-small { color: #a1aaa3; font-size: 9px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+    .aisle-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .aisle-button {
+      min-height: 40px; display: flex; align-items: center; gap: 7px; padding: 7px 8px;
+      border: 1px solid #edf1ed; border-radius: 10px; color: #59665d; background: #fff;
+      text-align: left; cursor: pointer; font-size: 9px; font-weight: 700; transition: .18s ease;
+    }
+    .aisle-button:hover, .aisle-button.active { color: var(--green-dark); border-color: #bde3c7; background: var(--green-soft); }
+    .aisle-emoji { font-size: 15px; }
+    .aisle-button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .bottom-left {
+      position: absolute; left: 22px; bottom: 21px; display: flex; align-items: end; gap: 9px;
+    }
+    .hint-card { display: flex; align-items: center; gap: 12px; padding: 10px 13px; color: #66736a; font-size: 10px; }
+    .key-group { display: flex; align-items: center; gap: 3px; }
+    .key {
+      min-width: 19px; height: 19px; display: grid; place-items: center; padding: 0 4px;
+      border: 1px solid #e3e9e4; border-radius: 5px; color: #68766d; background: #fafcf9;
+      font-size: 9px; font-weight: 800;
+    }
+    .hint-divider { width: 1px; height: 19px; background: #e7ece7; }
+    .hint-copy { line-height: 1.45; }
+    .hint-copy strong { color: #405047; font-weight: 800; }
+    .speed-pill {
+      display: inline-flex; align-items: center; gap: 5px; padding: 9px 11px; border-radius: 12px;
+      color: #f7fff8; background: rgba(31,67,43,.76); font-size: 10px; font-weight: 700;
+    }
+    .speed-pill span { color: #abedbd; }
+    .drive-toggle {
+      min-height: 38px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px;
+      border: 1px solid rgba(255,255,255,.82); border-radius: 12px; color: #355142;
+      background: rgba(255,255,255,.94); box-shadow: 0 8px 22px rgba(18,39,23,.16);
+      cursor: pointer; font-size: 10px; font-weight: 800; transition: .18s ease;
+    }
+    .drive-toggle:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(18,39,23,.2); }
+    .drive-toggle svg { width: 16px; height: 16px; color: var(--green-dark); }
+    .drive-toggle kbd { padding: 2px 5px; border-radius: 5px; color: #718078; background: #edf2ed; font-size: 9px; }
+    .drive-toggle[aria-pressed="true"] { border-color: var(--green); color: #fff; background: var(--green); }
+    .drive-toggle[aria-pressed="true"] svg { color: #fff; }
+    .drive-toggle[aria-pressed="true"] kbd { color: #fff; background: rgba(255,255,255,.18); }
+    .mobile-controls { display: none; }
+    .crosshair {
+      position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+      border: 1px solid rgba(255,255,255,.9); border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,.35);
+      opacity: .8; pointer-events: none;
+    }
+    .hover-tag {
+      position: absolute; top: 50%; left: 50%; transform: translate(17px, 12px);
+      display: none; padding: 7px 10px; border: 1px solid rgba(255,255,255,.7); border-radius: 9px;
+      color: #324338; background: rgba(255,255,255,.96); box-shadow: 0 5px 18px rgba(0,0,0,.15);
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .hover-tag.show { display: block; }
+    .hover-tag span { margin-left: 7px; color: var(--green); font-weight: 800; }
+
+    .overlay {
+      position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+      padding: 20px; background: rgba(17,35,22,.55); backdrop-filter: blur(8px);
+    }
+    .overlay.hidden { display: none; }
+    .start-card {
+      width: min(440px, 100%); padding: 30px; border: 1px solid rgba(255,255,255,.8);
+      border-radius: 25px; background: #fff; box-shadow: var(--shadow);
+    }
+    .start-kicker { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 99px; color: var(--green-dark); background: var(--green-soft); font-size: 10px; font-weight: 800; letter-spacing: .4px; }
+    .start-kicker .status-dot { width: 6px; height: 6px; box-shadow: none; }
+    .start-card h1 { margin: 18px 0 8px; font: 800 32px/1.1 Manrope, sans-serif; letter-spacing: -1.5px; }
+    .start-card h1 span { color: var(--green); }
+    .start-card > p { margin: 0; color: #738078; font-size: 13px; line-height: 1.65; }
+    .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 20px 0; }
+    .control-item { display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid #edf1ed; border-radius: 11px; }
+    .control-icon { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 9px; background: #f3f8f2; font-size: 14px; }
+    .control-item span:last-child { color: #627067; font-size: 10px; line-height: 1.4; }
+    .control-item strong { display: block; color: #35433a; font-size: 10px; }
+    .primary-button {
+      width: 100%; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      border: 0; border-radius: 12px; color: #fff; background: var(--green); cursor: pointer;
+      font-size: 12px; font-weight: 800; transition: .18s ease;
+    }
+    .primary-button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .primary-button svg { width: 16px; height: 16px; }
+    .start-foot { margin-top: 12px; color: #a0aaa2; text-align: center; font-size: 9px; }
+
+    .product-modal {
+      position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 18px;
+      background: rgba(16,33,21,.28); backdrop-filter: blur(3px);
+    }
+    .product-modal.hidden { display: none; }
+    .product-card {
+      position: relative; width: min(330px, 100%); padding: 21px; border: 1px solid rgba(255,255,255,.85);
+      border-radius: 22px; background: #fff; box-shadow: var(--shadow); animation: pop .18s ease-out;
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .close-button {
+      position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: grid; place-items: center;
+      border: 0; border-radius: 9px; color: #768178; background: #f4f6f3; cursor: pointer; font-size: 18px;
+    }
+    .product-art {
+      height: 124px; display: grid; place-items: center; overflow: hidden; border-radius: 15px;
+      background: radial-gradient(circle at 50% 70%, #fff 0%, #f6f8f2 70%);
+    }
+    .art-shape { position: relative; width: 54px; height: 72px; border-radius: 7px 7px 10px 10px; box-shadow: 0 12px 20px rgba(22,46,29,.18); transform: rotate(-4deg); }
+    .art-shape::before { content: ""; position: absolute; top: -9px; left: 8px; width: 38px; height: 12px; border-radius: 4px 4px 0 0; background: rgba(255,255,255,.75); }
+    .art-shape::after { content: ""; position: absolute; left: 9px; right: 9px; top: 26px; height: 18px; border-radius: 5px; background: rgba(255,255,255,.78); }
+    .product-category { margin-top: 15px; color: #87948b; font-size: 9px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
+    .product-name { margin: 5px 0 5px; font: 800 20px Manrope, sans-serif; letter-spacing: -.6px; }
+    .product-description { min-height: 38px; margin: 0; color: #7c8880; font-size: 11px; line-height: 1.6; }
+    .product-purchase { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 17px; }
+    .product-price { color: var(--green-dark); font: 800 21px Manrope, sans-serif; }
+    .product-price small { color: #8c988f; font: 500 9px "DM Sans", sans-serif; }
+    .add-button { width: auto; min-width: 132px; padding: 0 16px; }
+
+    .drawer-scrim {
+      position: fixed; inset: 0; z-index: 11; background: rgba(15,32,20,.36);
+      opacity: 0; visibility: hidden; transition: .25s ease;
+    }
+    .drawer-scrim.open { opacity: 1; visibility: visible; }
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 12; width: min(350px, calc(100vw - 24px));
+      display: flex; flex-direction: column; padding: 23px 22px 18px;
+      background: #fff; box-shadow: -16px 0 55px rgba(18,39,23,.16);
+      transform: translateX(104%); transition: transform .3s cubic-bezier(.2,.8,.2,1);
+    }
+    .cart-drawer.open { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .drawer-title { font: 800 20px Manrope, sans-serif; letter-spacing: -.6px; }
+    .drawer-subtitle { margin-top: 3px; color: #8b968e; font-size: 10px; }
+    .drawer-close { position: static; width: 44px; height: 44px; font-size: 22px; }
+    .cart-items { flex: 1; overflow: auto; padding: 9px 0; }
+    .empty-cart { height: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #98a39a; text-align: center; }
+    .empty-cart-icon { width: 52px; height: 52px; display: grid; place-items: center; margin-bottom: 11px; border-radius: 17px; background: #f1f7f1; font-size: 24px; }
+    .empty-cart strong { color: #536057; font-size: 13px; }
+    .empty-cart span { margin-top: 5px; font-size: 10px; }
+    .cart-line { display: flex; align-items: center; gap: 11px; padding: 12px 0; border-bottom: 1px solid #f0f3f0; }
+    .cart-line-art { width: 48px; height: 48px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 13px; background: #f4f7f1; font-size: 22px; }
+    .cart-line-info { flex: 1; min-width: 0; }
+    .cart-line-name { overflow: hidden; color: #3a493f; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .cart-line-price { margin-top: 4px; color: var(--green-dark); font-size: 10px; font-weight: 800; }
+    .qty-control { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+    .qty-control button { width: 36px; height: 36px; border: 1px solid #e6ece6; border-radius: 10px; color: #526057; background: #fff; cursor: pointer; font-size: 16px; font-weight: 700; }
+    .qty-control button:hover { border-color: #b7ddc1; color: var(--green-dark); background: #f4faf5; }
+    .qty-control span { min-width: 13px; color: #48564c; text-align: center; font-size: 10px; font-weight: 800; }
+    .remove-button { min-height: 36px; padding: 7px; border: 0; border-radius: 8px; color: #87938a; background: transparent; cursor: pointer; font-size: 10px; }
+    .remove-button:hover { color: #d4584c; }
+    .drawer-foot { padding-top: 13px; border-top: 1px solid var(--line); }
+    .subtotal-row { display: flex; justify-content: space-between; color: #66736a; font-size: 11px; }
+    .subtotal-row strong { color: var(--ink); font-size: 15px; }
+    .delivery-note { margin: 8px 0 13px; color: #99a39b; font-size: 9px; }
+    .drawer-checkout:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .checkout-modal {
+      position: fixed; inset: 0; z-index: 14; display: grid; place-items: center; padding: 16px;
+      background: rgba(16,33,21,.5); backdrop-filter: blur(6px);
+    }
+    .checkout-modal.hidden { display: none; }
+    .checkout-card { width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 23px; border-radius: 21px; background: #fff; box-shadow: var(--shadow); }
+    .checkout-title-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 17px; }
+    .checkout-title { margin: 0; font: 800 19px Manrope, sans-serif; }
+    .checkout-intro { margin: 4px 0 0; color: #8a968d; font-size: 10px; }
+    .form-field { display: block; margin: 11px 0; color: #627067; font-size: 10px; font-weight: 700; }
+    .form-field input, .form-field select {
+      width: 100%; height: 40px; margin-top: 6px; padding: 0 11px; border: 1px solid #e5ebe5;
+      border-radius: 10px; outline: 0; color: #34443a; background: #fbfcfa; font-size: 11px;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: #8bc69b; box-shadow: 0 0 0 3px #e9f6ec; }
+    .order-summary { margin: 14px 0; padding: 11px 12px; border-radius: 11px; color: #647168; background: #f5f8f4; font-size: 10px; }
+    .order-summary div { display: flex; justify-content: space-between; padding: 3px 0; }
+    .order-summary strong { color: #27382d; }
+    .form-error { display: none; margin: 8px 0; color: #bd4d41; font-size: 10px; }
+    .form-error.show { display: block; }
+    .success-state { display: none; padding: 12px 3px 4px; text-align: center; }
+    .success-state.show { display: block; }
+    .success-check { width: 55px; height: 55px; display: grid; place-items: center; margin: 2px auto 13px; border-radius: 18px; color: #fff; background: var(--green); font-size: 25px; }
+    .success-state h2 { margin: 0; font: 800 22px Manrope, sans-serif; }
+    .success-state p { margin: 8px 0 20px; color: #7c8880; font-size: 11px; line-height: 1.6; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 20; padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,.7); border-radius: 11px; color: #fff;
+      background: #243d2c; box-shadow: 0 8px 28px rgba(0,0,0,.2); font-size: 11px; font-weight: 700;
+      opacity: 0; transform: translate(-50%, 10px); pointer-events: none; transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .loader {
+      position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: #f6f8f4;
+      transition: opacity .35s ease, visibility .35s ease;
+    }
+    .loader.done { opacity: 0; visibility: hidden; }
+    .loader-inner { width: min(250px, 80vw); text-align: center; }
+    .loader-logo { width: 47px; height: 47px; display: grid; place-items: center; margin: 0 auto 13px; border-radius: 16px; color: #fff; background: var(--green); font-size: 22px; box-shadow: 0 7px 18px rgba(46,158,91,.22); }
+    .loader-title { font: 800 17px Manrope, sans-serif; }
+    .loader-sub { margin: 5px 0 13px; color: #95a096; font-size: 10px; }
+    .progress-track { height: 4px; overflow: hidden; border-radius: 8px; background: #e8eee7; }
+    .progress-fill { width: 0; height: 100%; border-radius: 8px; background: var(--green); transition: width .25s ease; }
+    .loader-percent { margin-top: 7px; color: #9aa59c; font-size: 9px; }
+    .error-message { position: fixed; inset: 0; z-index: 40; display: none; place-items: center; padding: 25px; color: #405047; background: #f6f8f4; text-align: center; }
+    .error-message.show { display: grid; }
+
+    @media (max-width: 760px) {
+      .topbar { top: 8px; left: 10px; right: 10px; height: 58px; padding: 0 9px 0 11px; border-radius: 16px; }
+      .brand { min-width: 0; gap: 7px; }
+      .brand-mark { width: 32px; height: 32px; border-radius: 10px; }
+      .brand-name { font-size: 14px; }
+      .brand-tag, .store-status, .icon-button.sound-button { display: none; }
+      .cart-button { min-width: 92px; height: 44px; gap: 5px; padding: 0 8px; font-size: 10px; }
+      .cart-count { width: 18px; height: 18px; font-size: 10px; }
+      .top-actions { gap: 6px; }
+      .icon-button { width: 44px; height: 44px; border-radius: 11px; }
+      .left-rail { top: 76px; left: 10px; width: min(250px, calc(100% - 20px)); gap: 7px; }
+      .search-card { padding: 11px; border-radius: 14px; }
+      .search-title { display: none; }
+      .search-card .eyebrow { display: none; }
+      .search-box { height: 38px; }
+      .filter-row { margin-top: 8px; }
+      .guide-card { padding: 10px; border-radius: 14px; }
+      .guide-head { margin-bottom: 7px; }
+      .guide-title { font-size: 11px; }
+      .guide-small { font-size: 8px; }
+      .aisle-list { gap: 4px; }
+      .aisle-button { min-height: 40px; padding: 6px; border-radius: 9px; font-size: 9px; }
+      .aisle-emoji { font-size: 13px; }
+      .bottom-left { left: 10px; bottom: 12px; }
+      .hint-card, .speed-pill { display: none; }
+      .drive-toggle { min-height: 42px; padding: 0 12px; border-radius: 13px; font-size: 11px; }
+      .drive-toggle kbd { display: none; }
+      .mobile-controls { position: absolute; right: 14px; bottom: 14px; display: block; width: 112px; height: 112px; pointer-events: auto; touch-action: none; }
+      .joystick-base { position: absolute; inset: 0; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(35,58,41,.37); backdrop-filter: blur(8px); }
+      .joystick-knob { position: absolute; top: 35px; left: 35px; width: 42px; height: 42px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 3px 12px rgba(0,0,0,.18); }
+      .crosshair { display: none; }
+      .hover-tag { display: none !important; }
+      .product-modal { align-items: end; padding: 10px; }
+      .product-card { width: min(380px, 100%); padding: 16px; border-radius: 20px; }
+      .product-art { height: 85px; }
+      .product-category { margin-top: 11px; }
+      .product-description { min-height: 0; }
+      .start-card { padding: 23px; }
+      .start-card h1 { font-size: 27px; }
+    }
+    @media (max-width: 390px) {
+      .left-rail { width: min(218px, calc(100% - 20px)); }
+      .aisle-button { font-size: 9px; gap: 5px; }
+      .search-box input { font-size: 11px; }
+      .control-grid { gap: 6px; }
+      .control-item { padding: 8px; }
+    }
+    @media (max-height: 560px) and (max-width: 760px) {
+      .left-rail { max-height: calc(100dvh - 145px); overflow-y: auto; scrollbar-width: thin; }
+      .guide-card { padding: 8px; }
+      .aisle-list { gap: 3px; }
+      .aisle-button { min-height: 33px; }
+      .mobile-controls { width: 92px; height: 92px; }
+      .joystick-knob { top: 28px; left: 28px; width: 34px; height: 34px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
+    :root {
+      --green: #268951;
+      --green-dark: #176f40;
+      --green-soft: #e8f5eb;
+      --line: #e2ebe2;
+      --shadow: 0 18px 48px rgba(24, 49, 31, .17);
+    }
+    .topbar {
+      border-color: rgba(255,255,255,.88);
+      background: linear-gradient(110deg, rgba(255,255,255,.97), rgba(247,251,246,.92));
+      box-shadow: 0 10px 36px rgba(24,49,31,.13);
+    }
+    .brand-mark { border-radius: 13px; }
+    .left-rail {
+      max-height: calc(100dvh - 142px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+    }
+    .left-rail::-webkit-scrollbar { display: none; }
+    .search-card, .guide-card, .hint-card {
+      border-color: rgba(255,255,255,.92);
+      background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(248,251,247,.93));
+      box-shadow: 0 12px 34px rgba(24,49,31,.13);
+    }
+    .search-card, .guide-card { border-radius: 20px; }
+    .search-box {
+      height: 46px;
+      border-color: #e2ebe2;
+      background: #f7faf6;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .search-box:focus-within {
+      border-color: #8bc69b;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(46,158,91,.11);
+    }
+    .search-box button {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      font-size: 20px;
+      transition: background .18s ease, transform .18s ease;
+    }
+    .search-box button:hover { background: var(--green-dark); transform: translateX(1px); }
+    .filter-row select { min-height: 36px; border-color: #e2ebe2; }
+    .filter-row select:focus-visible { border-color: #8bc69b; }
+    .guide-card { padding: 15px; }
+    .guide-title { font-size: 14px; }
+    .aisle-list { gap: 7px; }
+    .aisle-button {
+      min-height: 44px;
+      border-color: #e8eee8;
+      border-radius: 12px;
+      font-size: 10px;
+      transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+    .aisle-button:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(30,75,43,.08); }
+    .aisle-button.active {
+      border-color: #9bd1a9;
+      background: linear-gradient(105deg, #e7f5ea, #f3faf3);
+      box-shadow: inset 3px 0 0 var(--green);
+    }
+    .aisle-emoji {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 28px;
+      border-radius: 9px;
+      background: #edf6ed;
+      font-size: 15px;
+    }
+    .aisle-button:nth-child(1) .aisle-emoji { background: #fff0e6; }
+    .aisle-button:nth-child(2) .aisle-emoji { background: #e9f3fb; }
+    .aisle-button:nth-child(3) .aisle-emoji { background: #fff3df; }
+    .aisle-button:nth-child(4) .aisle-emoji { background: #fcebf0; }
+    .aisle-button:nth-child(5) .aisle-emoji { background: #e6f5f2; }
+    .aisle-button:nth-child(6) .aisle-emoji { background: #f1edfa; }
+    .icon-button, .cart-button { height: 44px; }
+    .icon-button { width: 44px; border-radius: 14px; }
+    .cart-button { border-radius: 14px; box-shadow: 0 5px 13px rgba(38,137,81,.18); }
+    .cart-count { box-shadow: 0 1px 3px rgba(20,65,35,.12); }
+    .hint-card, .speed-pill { border-radius: 14px; }
+    .mobile-controls { filter: drop-shadow(0 8px 18px rgba(14,32,20,.17)); }
+    .joystick-base { background: radial-gradient(circle at 35% 28%, rgba(86,132,97,.58), rgba(26,52,35,.78)); }
+    .joystick-knob { border: 2px solid rgba(255,255,255,.92); }
+    .start-card, .product-card, .checkout-card {
+      border-color: rgba(255,255,255,.96);
+      box-shadow: 0 24px 70px rgba(14,36,21,.22);
+    }
+    .start-card { border-radius: 28px; }
+    .control-item { background: linear-gradient(135deg, #fff, #f8faf7); }
+    .control-icon { flex: 0 0 29px; }
+    .product-card { border-radius: 24px; }
+    .product-art {
+      border: 1px solid #edf2eb;
+      background: radial-gradient(circle at 50% 65%, #fff 0%, #f1f7ed 76%);
+    }
+    .primary-button { border-radius: 13px; box-shadow: 0 5px 12px rgba(38,137,81,.15); }
+    .primary-button:active, .cart-button:active, .icon-button:active { transform: translateY(0) scale(.98); }
+    .cart-drawer { border-left: 1px solid #edf1ed; }
+    .cart-line-art { box-shadow: inset 0 0 0 1px rgba(30,60,37,.04); }
+    .toast { border-radius: 14px; }
+
+    @media (max-width: 760px) {
+      .topbar { height: 58px; }
+      .left-rail { max-height: calc(100dvh - 155px); }
+      .search-box { height: 42px; }
+      .guide-card { padding: 10px; }
+      .aisle-list { gap: 4px; }
+      .aisle-button { min-height: 40px; padding: 5px; font-size: 9px; }
+      .aisle-emoji { width: 25px; height: 25px; flex-basis: 25px; }
+      .brand-mark { width: 34px; height: 34px; }
+      .icon-button, .cart-button { height: 44px; }
+    }
+    @media (max-width: 390px) {
+      .aisle-button { min-height: 40px; font-size: 8.5px; }
+      .aisle-emoji { width: 23px; height: 23px; flex-basis: 23px; }
+    }
+    .category-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      background: rgba(18,34,22,.2);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .24s ease, visibility 0s linear .3s;
+    }
+    .category-scrim.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity .24s ease;
+    }
+    .category-drawer {
+      position: fixed;
+      top: 96px;
+      right: 22px;
+      bottom: 18px;
+      z-index: 6;
+      width: min(360px, calc(100vw - 32px));
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.92);
+      border-radius: 22px;
+      background: linear-gradient(150deg, rgba(255,255,255,.99), rgba(247,251,246,.98));
+      box-shadow: 0 20px 60px rgba(20,46,27,.2);
+      transform: translateX(calc(100% + 28px));
+      visibility: hidden;
+      transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s linear .3s;
+    }
+    .category-drawer.open {
+      transform: translateX(0);
+      visibility: visible;
+      transition: transform .3s cubic-bezier(.2,.8,.2,1);
+    }
+    .category-drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 0 15px;
+      border-bottom: 1px solid var(--line);
+    }
+    .category-drawer-kicker {
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.15px;
+    }
+    .category-drawer-head h2 {
+      margin: 5px 0 4px;
+      color: var(--ink);
+      font: 800 21px/1.2 Manrope, sans-serif;
+      letter-spacing: -.6px;
+    }
+    .category-drawer-head p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .category-drawer-close { position: static; flex: 0 0 36px; }
+    .category-product-list {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 14px 2px;
+      overscroll-behavior: contain;
+    }
+    .category-product {
+      width: 100%;
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px;
+      border: 1px solid #000000;
+      border-radius: 14px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .category-product:hover {
+      transform: translateY(-1px);
+      border-color: #b6dcbf;
+      box-shadow: 0 6px 16px rgba(30,75,43,.08);
+    }
+    .category-product-swatch {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      flex: 0 0 38px;
+      place-items: center;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px rgba(25,57,34,.06);
+      font-size: 19px;
+    }
+    .category-product-copy { min-width: 0; flex: 1; }
+    .category-product-name {
+      overflow: hidden;
+      color: #334238;
+      font-size: 12px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .category-product-price { margin-top: 4px; color: var(--green-dark); font-size: 11px; font-weight: 700; }
+    .category-product-arrow { color: #8ca093; font-size: 18px; }
+    .category-drawer-foot {
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: #87948b;
+      text-align: center;
+      font-size: 10px;
+    }
+    @media (max-width: 760px) {
+      .category-drawer { top: 76px; right: 10px; bottom: 10px; width: min(360px, calc(100vw - 20px)); padding: 16px; border-radius: 20px; }
+      .category-drawer-head h2 { font-size: 19px; }
+    }
+    @media (max-height: 560px) and (max-width: 760px) {
+      .category-drawer { top: 68px; bottom: 8px; padding: 12px; }
+      .category-product { min-height: 56px; }
+      .category-product-swatch { width: 34px; height: 34px; flex-basis: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="scene" aria-label="Interactive FreshMart 3D supermarket"></div>
+  <div class="vignette"></div>
+  <div class="hud">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 20c-4.1-2.6-6.2-5.7-6.2-9.2 0-2.4 1.7-4.1 4-4.1 1.2 0 2 .5 2.2 1.4.4-.9 1.2-1.4 2.4-1.4 2.2 0 3.8 1.7 3.8 4.1 0 3.5-2.1 6.6-6.2 9.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 17.5c0-3.5 1-5.8 3.5-7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="brand-copy">
+          <div class="brand-name">Fresh<span>Mart</span> 3D</div>
+          <div class="brand-tag">Good food, good mood</div>
+        </div>
+      </div>
+      <div class="store-status"><span class="status-dot"></span> Store open · Always fresh</div>
+      <div class="top-actions">
+        <button class="icon-button sound-button" id="soundButton" aria-label="Toggle store ambience" title="Toggle store ambience">
+          <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        </button>
+        <button class="icon-button" id="helpButton" aria-label="Show controls" title="Show controls">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.4 1.6c-1.2 1.1-2 1.5-2 3"/><path d="M12 17h.01"/></svg>
+        </button>
+        <button class="cart-button" id="cartButton" aria-label="Open shopping cart" aria-controls="cartDrawer" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <span>My cart</span><span class="cart-count" id="cartCount" aria-live="polite" aria-atomic="true">0</span>
+        </button>
+      </div>
+    </header>
+
+    <aside class="left-rail">
+      <section class="search-card">
+        <div class="eyebrow">Explore the store</div>
+        <div class="search-title">Find your fresh.</div>
+        <form class="search-box" id="searchForm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+          <input id="searchInput" type="search" placeholder="Search products..." autocomplete="off" aria-label="Search products" aria-controls="searchResults" aria-autocomplete="list" aria-expanded="false">
+          <button type="submit" aria-label="Search">→</button>
+        </form>
+        <div class="search-results" id="searchResults" aria-live="polite" aria-label="Product suggestions"></div>
+        <div class="filter-row">
+          <label for="categoryFilter">Browse category</label>
+          <select id="categoryFilter" aria-label="Filter by category" aria-controls="categoryDrawer"><option value="all">All departments</option></select>
+        </div>
+      </section>
+      <section class="guide-card">
+        <div class="guide-head"><div class="guide-title">Aisle guide</div><div class="guide-small">Tap to visit</div></div>
+        <div class="aisle-list" id="aisleList" role="group" aria-label="Store departments"></div>
+      </section>
+    </aside>
+
+    <div class="category-scrim" id="categoryScrim" aria-hidden="true"></div>
+    <aside class="category-drawer" id="categoryDrawer" role="dialog" aria-modal="true" aria-labelledby="categoryDrawerTitle" aria-hidden="true" inert>
+      <div class="category-drawer-head">
+        <div>
+          <div class="category-drawer-kicker">DEPARTMENT PICKS</div>
+          <h2 id="categoryDrawerTitle">Browse aisle</h2>
+          <p id="categoryDrawerDescription">Choose a fresh find to visit.</p>
+        </div>
+        <button class="close-button category-drawer-close" id="categoryDrawerClose" type="button" aria-label="Close department">×</button>
+      </div>
+      <div class="category-product-list" id="categoryProducts"></div>
+      <div class="category-drawer-foot">Choose an item to visit its shelf</div>
+    </aside>
+
+    <div class="crosshair"></div>
+    <div class="hover-tag" id="hoverTag" aria-live="polite" aria-atomic="true"></div>
+    <div class="bottom-left">
+      <div class="hint-card">
+        <div class="key-group"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span></div>
+        <div class="hint-copy"><strong>Move</strong> around</div><span class="hint-divider"></span>
+        <div class="hint-copy"><strong>Drag</strong> to look</div>
+      </div>
+      <div class="speed-pill">✦ <span>Fresh finds</span> around every corner</div>
+      <button class="drive-toggle" id="driveToggle" type="button" aria-pressed="false" title="Drive the shopping cart with WASD or arrows (C)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg>
+        <span>Drive cart</span><kbd>C</kbd>
+      </button>
+    </div>
+    <div class="mobile-controls" id="joystick" aria-label="Move with virtual joystick">
+      <div class="joystick-base"></div><div class="joystick-knob" id="joystickKnob"></div>
+    </div>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <div class="loader-logo">✿</div><div class="loader-title">Setting the shelves...</div>
+      <div class="loader-sub">Getting your store ready</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="loader-percent" id="loaderPercent">0%</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="startOverlay" role="dialog" aria-modal="true" aria-labelledby="startHeading">
+    <div class="start-card">
+      <div class="start-kicker"><span class="status-dot"></span> YOUR FRESHMART IS READY</div>
+      <h1 id="startHeading">A little more life<br>in every <span>aisle.</span></h1>
+      <p>Take a stroll through our virtual store, discover something delicious, and fill up your cart with the good stuff.</p>
+      <div class="control-grid">
+        <div class="control-item"><span class="control-icon">⌨</span><span><strong>Move around</strong>WASD, arrows, or joystick · C to drive cart</span></div>
+        <div class="control-item"><span class="control-icon">↗</span><span><strong>Look around</strong>Drag your mouse or touch screen</span></div>
+        <div class="control-item"><span class="control-icon">☝</span><span><strong>Pick a product</strong>Click or tap to shop</span></div>
+        <div class="control-item"><span class="control-icon">⌖</span><span><strong>Find an aisle</strong>Use the aisle guide</span></div>
+      </div>
+      <button class="primary-button" id="startButton">Step inside <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+      <div class="start-foot">A brighter kind of grocery run · No bags required</div>
+    </div>
+  </div>
+
+  <div class="product-modal hidden" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productName">
+    <article class="product-card" id="productCard" tabindex="-1">
+      <button class="close-button" id="productClose" aria-label="Close product">×</button>
+      <div class="product-art"><div class="art-shape" id="productArt"></div></div>
+      <div class="product-category" id="productCategory"></div>
+      <h2 class="product-name" id="productName"></h2>
+      <p class="product-description" id="productDescription"></p>
+      <div class="product-purchase"><div class="product-price" id="productPrice"></div><button class="primary-button add-button" id="addToCart">Add to cart</button></div>
+    </article>
+  </div>
+
+  <div class="drawer-scrim" id="drawerScrim"></div>
+  <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerHeading" aria-hidden="true" inert>
+    <div class="drawer-head">
+      <div><div class="drawer-title" id="drawerHeading">Your basket <span id="drawerItemCount"></span></div><div class="drawer-subtitle">A little goodness, gathered in one place.</div></div>
+      <button class="close-button drawer-close" id="drawerClose" aria-label="Close cart">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="drawer-foot">
+      <div class="subtotal-row"><span>Subtotal</span><strong id="cartTotal">$0.00</strong></div>
+      <div class="delivery-note">Delivery and taxes calculated at checkout.</div>
+      <button class="primary-button drawer-checkout" id="checkoutButton" disabled>Continue to checkout <span>→</span></button>
+    </div>
+  </aside>
+
+  <div class="checkout-modal hidden" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutHeading">
+    <section class="checkout-card">
+      <div class="checkout-title-row"><div><h2 class="checkout-title" id="checkoutHeading">Almost there!</h2><p class="checkout-intro">Where should we bring your fresh finds?</p></div><button class="close-button" id="checkoutClose" aria-label="Close checkout">×</button></div>
+      <form id="checkoutForm">
+        <div id="checkoutFields">
+          <label class="form-field">Full name<input name="name" type="text" autocomplete="name" required minlength="2" placeholder="Jamie Green"></label>
+          <label class="form-field">Delivery address<input name="address" type="text" autocomplete="street-address" required minlength="5" placeholder="42 Garden Lane, Apt 2"></label>
+          <label class="form-field">Payment method<select name="payment" required><option value="">Choose a payment method</option><option>Credit or debit card</option><option>Pay on delivery</option><option>Digital wallet</option></select></label>
+          <div class="order-summary" id="orderSummary"></div>
+          <div class="form-error" id="formError">Please fill in each field with valid information.</div>
+          <button class="primary-button" type="submit">Place my order <span>→</span></button>
+        </div>
+        <div class="success-state" id="successState"><div class="success-check">✓</div><h2>You're all set!</h2><p id="successMessage">Your order is on its way. Thanks for shopping fresh with us!</p><button class="primary-button" type="button" id="doneButton">Back to the store</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="error-message" id="errorMessage"><div><strong>We couldn't load the 3D store.</strong><p>Please check your connection and reload the page to try again.</p></div></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    "use strict";
+
+    // Product catalog: position is the center of the shelf in the 3D store.
+    const categories = [
+      { name: "Fruits & Vegetables", icon: "🥑", color: "#e87842", position: [-5.2, 21] },
+      { name: "Dairy", icon: "🥛", color: "#4b9bd2", position: [5.2, 21] },
+      { name: "Bakery", icon: "🥐", color: "#d58b3e", position: [-5.2, 12.6] },
+      { name: "Snacks", icon: "🍿", color: "#d75f79", position: [5.2, 12.6] },
+      { name: "Beverages", icon: "🧃", color: "#35a99d", position: [-5.2, 4.2] },
+      { name: "Household", icon: "🧼", color: "#8a70bd", position: [5.2, 4.2] },
+      { name: "Frozen Foods", icon: "❄️", color: "#438dc5", position: [-5.2, -4.2] },
+      { name: "Meat & Seafood", icon: "🥩", color: "#c75855", position: [5.2, -4.2] },
+      { name: "Canned & Dry Goods", icon: "🥫", color: "#d39b42", position: [-5.2, -12.6] },
+      { name: "Health & Beauty", icon: "🧴", color: "#d878a4", position: [5.2, -12.6] },
+      { name: "Baby Care", icon: "🍼", color: "#70a9c8", position: [-5.2, -21] },
+      { name: "Pet Supplies", icon: "🐾", color: "#7c9a58", position: [5.2, -21] }
+    ];
+    const products = [
+      { id: "avocado", name: "Creamy Avocados", price: 2.49, category: "Fruits & Vegetables", color: "#5b9e46", kind: "sphere", description: "Ripe, buttery avocados picked at their peak. Perfect on toast or straight from the skin.", emoji: "🥑" },
+      { id: "strawberries", name: "Sweet Strawberries", price: 3.29, category: "Fruits & Vegetables", color: "#e95d54", kind: "sphere", description: "Bright, juicy berries with a lovely natural sweetness. A little sunshine in every bite.", emoji: "🍓" },
+      { id: "oranges", name: "Sunshine Oranges", price: 1.89, category: "Fruits & Vegetables", color: "#f39b45", kind: "sphere", description: "Citrusy, easy-peel oranges full of fresh flavor and a little morning-day magic.", emoji: "🍊" },
+      { id: "carrots", name: "Garden Carrots", price: 1.59, category: "Fruits & Vegetables", color: "#f18736", kind: "cylinder", description: "Crunchy, sweet carrots grown in good soil and ready for your favorite recipes.", emoji: "🥕" },
+      { id: "bananas", name: "Golden Bananas", price: 2.19, category: "Fruits & Vegetables", color: "#efce4a", kind: "cylinder", description: "Naturally sweet bananas, picked ripe and ready for breakfast or a quick snack.", emoji: "🍌" },
+      { id: "blueberries", name: "Blueberry Bunches", price: 4.29, category: "Fruits & Vegetables", color: "#587bc0", kind: "sphere", description: "Plump, juicy blueberries packed with bright berry flavor.", emoji: "🫐" },
+      { id: "red-apples", name: "Crisp Red Apples", price: 2.29, category: "Fruits & Vegetables", color: "#d94d45", kind: "sphere", description: "Crunchy red apples with a naturally sweet finish.", emoji: "🍎" },
+      { id: "baby-spinach", name: "Fresh Baby Spinach", price: 3.19, category: "Fruits & Vegetables", color: "#4f9b55", kind: "box", description: "Tender baby spinach leaves for salads and everyday meals.", emoji: "🥬" },
+      { id: "oat-milk", name: "Oat Milk", price: 3.79, category: "Dairy", color: "#d9c198", kind: "box", description: "Smooth, creamy oat milk with a naturally mellow taste. Lovely in coffee, cereal, or on its own.", emoji: "🥛" },
+      { id: "farm-milk", name: "Whole Farm Milk", price: 4.19, category: "Dairy", color: "#e9f2f1", kind: "box", description: "Fresh whole milk from happy local farms. Rich, comforting, and wonderfully versatile.", emoji: "🥛" },
+      { id: "cheddar", name: "Mild Cheddar", price: 4.79, category: "Dairy", color: "#f3bd46", kind: "box", description: "A smooth, mellow cheddar that's made for toasties, cheese boards, and sneaky slices.", emoji: "🧀" },
+      { id: "yogurt", name: "Greek Yogurt", price: 2.99, category: "Dairy", color: "#f3efdf", kind: "cylinder", description: "Thick and creamy Greek-style yogurt. Add fresh fruit, honey, or just grab a spoon.", emoji: "🥣" },
+      { id: "salted-butter", name: "Creamy Salted Butter", price: 4.49, category: "Dairy", color: "#efc94e", kind: "box", description: "Rich, creamy butter with a pinch of salt for toast and cooking.", emoji: "🧈" },
+      { id: "berry-yogurt", name: "Berry Yogurt Cups", price: 3.49, category: "Dairy", color: "#dd6d91", kind: "cylinder", description: "Smooth yogurt swirled with sweet, tangy berries in handy single cups.", emoji: "🍓" },
+      { id: "cream-cheese", name: "Creamy Cream Cheese", price: 3.89, category: "Dairy", color: "#eeeada", kind: "box", description: "Smooth, spreadable cream cheese for bagels and baking.", emoji: "🧀" },
+      { id: "vanilla-custard", name: "Vanilla Custard", price: 3.59, category: "Dairy", color: "#eadba4", kind: "cylinder", description: "Silky vanilla custard with a rich, comforting flavor.", emoji: "🍮" },
+      { id: "sourdough", name: "Country Sourdough", price: 5.49, category: "Bakery", color: "#bc7847", kind: "box", description: "Golden, crusty sourdough with a soft center and slow-fermented flavor.", emoji: "🍞" },
+      { id: "croissants", name: "Butter Croissants", price: 4.29, category: "Bakery", color: "#e5aa54", kind: "sphere", description: "Flaky, golden layers with real butter. Your weekend breakfast just called.", emoji: "🥐" },
+      { id: "blueberry-muffins", name: "Blueberry Muffins", price: 4.59, category: "Bakery", color: "#8e79b7", kind: "cylinder", description: "Soft-baked muffins bursting with blueberries. Fresh from our neighborhood bakery.", emoji: "🫐" },
+      { id: "bagels", name: "Everything Bagels", price: 3.99, category: "Bakery", color: "#ca8e50", kind: "cylinder", description: "Chewy, toasty bagels finished with a savory everything seasoning.", emoji: "🥯" },
+      { id: "cinnamon-rolls", name: "Cinnamon Swirl Rolls", price: 4.79, category: "Bakery", color: "#bb7541", kind: "cylinder", description: "Soft, golden rolls layered with cinnamon and a sweet glaze.", emoji: "🍥" },
+      { id: "brioche", name: "Golden Brioche Loaf", price: 4.99, category: "Bakery", color: "#dfa64e", kind: "box", description: "A tender, buttery loaf with a delicate golden crust.", emoji: "🍞" },
+      { id: "sesame-baguette", name: "Sesame Baguette", price: 3.79, category: "Bakery", color: "#c58a4f", kind: "cylinder", description: "A crisp baguette topped with toasted sesame seeds.", emoji: "🥖" },
+      { id: "chocolate-danish", name: "Chocolate Danish", price: 4.49, category: "Bakery", color: "#8d5b42", kind: "box", description: "Flaky pastry filled with smooth chocolate.", emoji: "🥐" },
+      { id: "granola", name: "Honey Granola", price: 5.29, category: "Snacks", color: "#d8a34c", kind: "box", description: "Toasty oats, crunchy nuts, and a touch of honey for snack breaks or breakfast bowls.", emoji: "🥣" },
+      { id: "popcorn", name: "Sea Salt Popcorn", price: 2.49, category: "Snacks", color: "#f3c457", kind: "box", description: "Light, fluffy popcorn with a pinch of sea salt. Movie night made a little better.", emoji: "🍿" },
+      { id: "dark-chocolate", name: "Dark Chocolate", price: 3.69, category: "Snacks", color: "#72504a", kind: "box", description: "A rich, silky dark chocolate bar for your well-deserved little moment.", emoji: "🍫" },
+      { id: "almonds", name: "Roasted Almonds", price: 6.49, category: "Snacks", color: "#b48759", kind: "cylinder", description: "Crunchy roasted almonds, lightly seasoned and ready for the snack drawer.", emoji: "🥜" },
+      { id: "pretzels", name: "Crunchy Pretzel Twists", price: 3.19, category: "Snacks", color: "#c88445", kind: "box", description: "Oven-baked pretzel twists with a crisp bite and a little sea salt.", emoji: "🥨" },
+      { id: "trail-mix", name: "Berry Trail Mix", price: 5.79, category: "Snacks", color: "#a87255", kind: "cylinder", description: "A cheerful mix of nuts, fruit, and chocolate for on-the-go energy.", emoji: "🥜" },
+      { id: "cheese-crackers", name: "Cheddar Crackers", price: 3.59, category: "Snacks", color: "#edb94d", kind: "box", description: "Crunchy bite-size crackers with bold cheddar flavor.", emoji: "🧀" },
+      { id: "fruit-chews", name: "Mixed Fruit Chews", price: 2.99, category: "Snacks", color: "#d97592", kind: "box", description: "Soft fruity chews in a colorful assortment.", emoji: "🍬" },
+      { id: "sparkling-water", name: "Sparkling Water", price: 1.49, category: "Beverages", color: "#6ac9c6", kind: "cylinder", description: "Crisp, refreshing bubbles with no added sugar. A bright little pick-me-up.", emoji: "💧" },
+      { id: "orange-juice", name: "Orange Juice", price: 3.89, category: "Beverages", color: "#f6a442", kind: "box", description: "A cheerful glass of 100% orange juice, pressed from sun-ripened fruit.", emoji: "🍊" },
+      { id: "cold-brew", name: "Vanilla Cold Brew", price: 4.99, category: "Beverages", color: "#77564c", kind: "cylinder", description: "Slow-steeped coffee with a soft vanilla finish. Smooth energy for wherever today goes.", emoji: "☕" },
+      { id: "green-tea", name: "Garden Green Tea", price: 3.49, category: "Beverages", color: "#75a86b", kind: "box", description: "Delicate green tea with a fresh, clean finish. A calming cup, any time of day.", emoji: "🍵" },
+      { id: "cola", name: "Classic Cola", price: 2.29, category: "Beverages", color: "#813f38", kind: "cylinder", description: "A cool, fizzy classic in a grab-and-go can.", emoji: "🥤" },
+      { id: "apple-juice", name: "Crisp Apple Juice", price: 3.29, category: "Beverages", color: "#b7ba45", kind: "box", description: "Bright apple juice with a crisp, naturally sweet finish.", emoji: "🧃" },
+      { id: "berry-smoothie", name: "Berry Breakfast Smoothie", price: 4.49, category: "Beverages", color: "#9c5e90", kind: "cylinder", description: "A chilled blend of berries and yogurt for a quick breakfast.", emoji: "🥤" },
+      { id: "peach-iced-tea", name: "Peach Iced Tea", price: 2.79, category: "Beverages", color: "#e49c66", kind: "cylinder", description: "Refreshing iced tea with a mellow peach finish.", emoji: "🍑" },
+      { id: "dish-soap", name: "Lemon Dish Soap", price: 3.99, category: "Household", color: "#e8d349", kind: "cylinder", description: "A hardworking, plant-based dish soap with a bright lemon scent.", emoji: "🍋" },
+      { id: "laundry", name: "Fresh Laundry Wash", price: 8.99, category: "Household", color: "#86b3d2", kind: "box", description: "Gentle on fabrics and tough on everyday mess, with a lovely clean-linen scent.", emoji: "🫧" },
+      { id: "paper-towels", name: "Soft Paper Towels", price: 5.79, category: "Household", color: "#e7e5d7", kind: "cylinder", description: "Strong, soft, and ready for life's little spills. Made with responsibly sourced paper.", emoji: "🧻" },
+      { id: "hand-soap", name: "Citrus Hand Soap", price: 4.49, category: "Household", color: "#efad70", kind: "cylinder", description: "A gentle foaming hand soap with a fresh citrus scent and aloe for soft hands.", emoji: "🧴" },
+      { id: "glass-cleaner", name: "Fresh Glass Cleaner", price: 4.29, category: "Household", color: "#54a9cb", kind: "cylinder", description: "A streak-free cleaner for sparkling windows and shiny surfaces.", emoji: "🧽" },
+      { id: "trash-bags", name: "Strong Kitchen Bags", price: 6.29, category: "Household", color: "#77878e", kind: "box", description: "Tough, dependable bags for everyday kitchen cleanups.", emoji: "🗑️" },
+      { id: "fabric-softener", name: "Fresh Fabric Softener", price: 7.49, category: "Household", color: "#8db8d8", kind: "box", description: "Softens clothes and leaves a light clean fragrance.", emoji: "👕" },
+      { id: "surface-wipes", name: "Multipurpose Surface Wipes", price: 4.99, category: "Household", color: "#83bca1", kind: "box", description: "Convenient wipes for quick everyday surface cleaning.", emoji: "🧽" },
+      { id: "frozen-peas", name: "Garden Sweet Peas", price: 3.49, category: "Frozen Foods", color: "#67a74f", kind: "box", description: "Sweet garden peas frozen at their freshest for quick, easy meals.", emoji: "🫛" },
+      { id: "frozen-pizza", name: "Stone-Baked Pizza", price: 7.99, category: "Frozen Foods", color: "#d75e45", kind: "box", description: "A crisp stone-baked crust topped with tomato and stretchy cheese.", emoji: "🍕" },
+      { id: "vanilla-ice-cream", name: "Vanilla Bean Ice Cream", price: 5.49, category: "Frozen Foods", color: "#eadbb7", kind: "cylinder", description: "Silky vanilla bean ice cream for scoops, sundaes, and smiles.", emoji: "🍨" },
+      { id: "frozen-berries", name: "Frozen Berry Medley", price: 5.29, category: "Frozen Foods", color: "#814f91", kind: "sphere", description: "A colorful blend of frozen berries for smoothies and baking.", emoji: "🫐" },
+      { id: "crispy-fries", name: "Crispy Golden Fries", price: 4.79, category: "Frozen Foods", color: "#e9bd50", kind: "box", description: "Golden, oven-ready fries for a quick family favorite.", emoji: "🍟" },
+      { id: "veggie-dumplings", name: "Veggie Dumplings", price: 6.49, category: "Frozen Foods", color: "#8ab66d", kind: "box", description: "Flavorful vegetable dumplings, ready for a fast skillet meal.", emoji: "🥟" },
+      { id: "garlic-bread", name: "Frozen Garlic Bread", price: 3.99, category: "Frozen Foods", color: "#c99a5a", kind: "box", description: "Golden garlic bread, crisp and ready from the oven.", emoji: "🥖" },
+      { id: "mango-chunks", name: "Frozen Mango Chunks", price: 4.99, category: "Frozen Foods", color: "#e7a43c", kind: "cylinder", description: "Sweet mango pieces for smoothies and frozen desserts.", emoji: "🥭" },
+      { id: "chicken-breast", name: "Chicken Breast Fillets", price: 9.99, category: "Meat & Seafood", color: "#e7b6a5", kind: "box", description: "Tender chicken breast fillets, ready for weeknight recipes.", emoji: "🍗" },
+      { id: "salmon-fillet", name: "Atlantic Salmon Fillet", price: 12.49, category: "Meat & Seafood", color: "#e98368", kind: "box", description: "Rich, flaky salmon with a bright, delicate flavor.", emoji: "🐟" },
+      { id: "prawns", name: "Sweet Sea Prawns", price: 10.49, category: "Meat & Seafood", color: "#df8d79", kind: "cylinder", description: "Succulent prawns that are perfect for pasta, salads, and stir-fry.", emoji: "🍤" },
+      { id: "beef-mince", name: "Lean Beef Mince", price: 8.79, category: "Meat & Seafood", color: "#a84d48", kind: "box", description: "Lean, versatile beef mince for burgers, sauces, and family meals.", emoji: "🥩" },
+      { id: "pork-sausages", name: "Herb Pork Sausages", price: 6.99, category: "Meat & Seafood", color: "#bc7663", kind: "cylinder", description: "Juicy pork sausages seasoned with garden herbs.", emoji: "🌭" },
+      { id: "white-fish", name: "Mild White Fish", price: 9.49, category: "Meat & Seafood", color: "#d7c6ad", kind: "box", description: "Flaky white fish with a clean, mild taste for easy dinners.", emoji: "🐠" },
+      { id: "turkey-slices", name: "Roasted Turkey Slices", price: 7.49, category: "Meat & Seafood", color: "#d6a48f", kind: "box", description: "Thinly sliced roasted turkey for sandwiches and quick meals.", emoji: "🥪" },
+      { id: "beef-steak", name: "Sirloin Beef Steak", price: 11.99, category: "Meat & Seafood", color: "#9d4844", kind: "box", description: "A tender sirloin steak cut for grilling or pan cooking.", emoji: "🥩" },
+      { id: "tomato-can", name: "Italian Chopped Tomatoes", price: 1.79, category: "Canned & Dry Goods", color: "#cf5547", kind: "cylinder", description: "Juicy chopped tomatoes for soups, sauces, and slow-cooked favorites.", emoji: "🍅" },
+      { id: "chickpeas", name: "Ready-to-Cook Chickpeas", price: 1.99, category: "Canned & Dry Goods", color: "#d8b975", kind: "cylinder", description: "Creamy chickpeas, a pantry staple for curries, salads, and hummus.", emoji: "🫘" },
+      { id: "pasta", name: "Italian Penne Pasta", price: 2.49, category: "Canned & Dry Goods", color: "#e7c768", kind: "box", description: "Durum wheat penne that holds every bit of your favorite sauce.", emoji: "🍝" },
+      { id: "basmati-rice", name: "Fragrant Basmati Rice", price: 5.49, category: "Canned & Dry Goods", color: "#e6dec6", kind: "box", description: "Long-grain basmati rice with a light, aromatic finish.", emoji: "🍚" },
+      { id: "red-lentils", name: "Red Lentils", price: 3.29, category: "Canned & Dry Goods", color: "#c87853", kind: "cylinder", description: "Quick-cooking red lentils for hearty soups and wholesome curries.", emoji: "🫘" },
+      { id: "vegetable-soup", name: "Hearty Vegetable Soup", price: 2.79, category: "Canned & Dry Goods", color: "#8eaa59", kind: "cylinder", description: "A cozy, garden-vegetable soup ready to warm up in minutes.", emoji: "🥣" },
+      { id: "black-beans", name: "Black Beans", price: 1.89, category: "Canned & Dry Goods", color: "#4e4a43", kind: "cylinder", description: "Ready-to-use black beans for bowls, soups, and tacos.", emoji: "🫘" },
+      { id: "breakfast-cereal", name: "Crunchy Honey Cereal", price: 4.29, category: "Canned & Dry Goods", color: "#d9a64b", kind: "box", description: "Golden toasted cereal with a light honey crunch.", emoji: "🥣" },
+      { id: "daily-shampoo", name: "Daily Fresh Shampoo", price: 5.49, category: "Health & Beauty", color: "#56abc2", kind: "cylinder", description: "A gentle everyday shampoo that leaves hair feeling clean and soft.", emoji: "🧴" },
+      { id: "soft-conditioner", name: "Silky Smooth Conditioner", price: 5.49, category: "Health & Beauty", color: "#9676b5", kind: "cylinder", description: "A nourishing conditioner for smooth, easy-to-brush hair.", emoji: "🧖" },
+      { id: "mint-toothpaste", name: "Cool Mint Toothpaste", price: 3.29, category: "Health & Beauty", color: "#6ca9a0", kind: "box", description: "A refreshing mint toothpaste for a clean, bright start to the day.", emoji: "🪥" },
+      { id: "body-wash", name: "Citrus Body Wash", price: 4.79, category: "Health & Beauty", color: "#e7a54f", kind: "cylinder", description: "A lively citrus body wash for a fresh, feel-good shower.", emoji: "🧼" },
+      { id: "daily-moisturizer", name: "Daily Face Moisturizer", price: 8.99, category: "Health & Beauty", color: "#e7d8c6", kind: "cylinder", description: "A lightweight moisturizer that leaves skin feeling soft and comfortable.", emoji: "🧴" },
+      { id: "sun-lotion", name: "Everyday Sun Lotion", price: 7.49, category: "Health & Beauty", color: "#f0c64c", kind: "box", description: "A handy sun lotion for bright days outdoors.", emoji: "☀️" },
+      { id: "lip-balm", name: "Nourishing Lip Balm", price: 2.49, category: "Health & Beauty", color: "#d98c89", kind: "cylinder", description: "A soothing balm that keeps lips soft and comfortable.", emoji: "💄" },
+      { id: "deodorant", name: "Fresh Day Deodorant", price: 4.99, category: "Health & Beauty", color: "#77aeca", kind: "cylinder", description: "Reliable everyday freshness in a gentle formula.", emoji: "🧴" },
+      { id: "soft-diapers", name: "Cloud-Soft Diapers", price: 12.99, category: "Baby Care", color: "#a9cde0", kind: "box", description: "Soft, comfy diapers designed for little everyday adventures.", emoji: "👶" },
+      { id: "baby-wipes", name: "Gentle Baby Wipes", price: 4.49, category: "Baby Care", color: "#f1d5a5", kind: "box", description: "Gentle, fragrance-free wipes for quick cleanups at home or on the go.", emoji: "🧻" },
+      { id: "baby-lotion", name: "Tender Baby Lotion", price: 5.79, category: "Baby Care", color: "#8dc1ce", kind: "cylinder", description: "A soft, gentle lotion made for delicate baby skin.", emoji: "🧴" },
+      { id: "apple-puree", name: "Apple Baby Puree", price: 2.49, category: "Baby Care", color: "#d3b756", kind: "cylinder", description: "Smooth apple puree in a little ready-to-serve cup.", emoji: "🍎" },
+      { id: "baby-formula", name: "Gentle Baby Formula", price: 15.99, category: "Baby Care", color: "#eee5d3", kind: "box", description: "A carefully prepared everyday formula for growing little ones.", emoji: "🍼" },
+      { id: "pacifier-set", name: "Soft Start Pacifier Set", price: 6.99, category: "Baby Care", color: "#e792ab", kind: "cylinder", description: "A soothing two-piece pacifier set in soft, gentle colors.", emoji: "🧸" },
+      { id: "baby-cereal", name: "Gentle Baby Cereal", price: 4.79, category: "Baby Care", color: "#d9bd75", kind: "box", description: "A smooth, easy-preparation cereal for growing appetites.", emoji: "🥣" },
+      { id: "teething-toy", name: "Soft Teething Toy", price: 5.49, category: "Baby Care", color: "#78bdd1", kind: "sphere", description: "A colorful soft toy made for soothing little teething moments.", emoji: "🧸" },
+      { id: "puppy-kibble", name: "Hearty Puppy Kibble", price: 13.99, category: "Pet Supplies", color: "#a77a4b", kind: "box", description: "Crunchy, nourishing kibble for happy, energetic pups.", emoji: "🐶" },
+      { id: "cat-treats", name: "Tuna Cat Treats", price: 4.29, category: "Pet Supplies", color: "#d88c55", kind: "box", description: "Little crunchy treats with a tasty tuna flavor cats love.", emoji: "🐱" },
+      { id: "dog-biscuits", name: "Oven-Baked Dog Biscuits", price: 5.49, category: "Pet Supplies", color: "#c5965d", kind: "box", description: "Crunchy oven-baked biscuits for a well-deserved tail wag.", emoji: "🦴" },
+      { id: "clumping-litter", name: "Fresh Clumping Litter", price: 10.99, category: "Pet Supplies", color: "#baa881", kind: "cylinder", description: "A dependable clumping litter that makes cleanup simple.", emoji: "🐾" },
+      { id: "rope-toy", name: "Color Pop Rope Toy", price: 6.49, category: "Pet Supplies", color: "#e66651", kind: "sphere", description: "A bright, bouncy toy for playtime with your favorite companion.", emoji: "🧶" },
+      { id: "pet-shampoo", name: "Gentle Pet Shampoo", price: 7.29, category: "Pet Supplies", color: "#79b8a1", kind: "cylinder", description: "A mild, fresh-scented shampoo for a happy, clean coat.", emoji: "🫧" },
+      { id: "cat-kibble", name: "Premium Cat Kibble", price: 11.49, category: "Pet Supplies", color: "#8d704d", kind: "box", description: "Balanced crunchy kibble for healthy, happy cats.", emoji: "🐱" },
+      { id: "pet-ball", name: "Bouncy Pet Ball", price: 3.99, category: "Pet Supplies", color: "#62aeca", kind: "sphere", description: "A colorful, lightweight ball for indoor and outdoor play.", emoji: "🎾" }
+    ];
+
+    const money = value => "$" + value.toFixed(2);
+    const cartStorageKey = "freshmart3d-cart-v1";
+    let cart = loadCart();
+    let scene, camera, renderer, raycaster, clock;
+    let productMeshes = [];
+    let instanceProductIds = {};
+    let selectedProduct = null;
+    let hoveredInstance = null;
+    let activeCategory = null;
+    let yaw = 0, pitch = 0;
+    let pendingProduct = null;
+    let dragging = false, pointerMoved = false, lastPointer = { x: 0, y: 0 };
+    let moveForward = 0, moveSide = 0;
+    let cameraTarget = null;
+    let driveMode = false;
+    let toastTimer;
+    const keys = new Set();
+    const visualCarts = [];
+    const audio = { context: null, oscillator: null, gain: null, enabled: false };
+    const sceneRoot = document.getElementById("scene");
+
+    // Initialize the 3D world and share product geometry through InstancedMesh.
+    function initScene() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color("#e7edf1");
+      scene.fog = new THREE.Fog("#e7edf1", 38, 92);
+      camera = new THREE.PerspectiveCamera(window.innerWidth <= 760 ? 78 : 67, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 1.68, 24);
+      camera.rotation.order = "YXZ";
+      camera.lookAt(0, 1.68, 15);
+      yaw = 0;
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.domElement.tabIndex = 0;
+      renderer.domElement.setAttribute("aria-label", "FreshMart 3D store. Use the aisle guide or WASD keys to explore.");
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.82;
+      sceneRoot.appendChild(renderer.domElement);
+      raycaster = new THREE.Raycaster();
+      raycaster.far = 12;
+      clock = new THREE.Clock();
+
+      scene.add(new THREE.HemisphereLight(0xfffcf5, 0x8292a2, 0.58));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 0.62);
+      keyLight.position.set(-5, 11, 6);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.set(1024, 1024);
+      keyLight.shadow.camera.left = -20;
+      keyLight.shadow.camera.right = 20;
+      keyLight.shadow.camera.top = 30;
+      keyLight.shadow.camera.bottom = -30;
+      keyLight.shadow.bias = -0.0005;
+      scene.add(keyLight);
+      [[-12, 5, -18], [12, 5, -18], [-12, 5, 18], [12, 5, 18]].forEach(point => {
+        const light = new THREE.PointLight(0xeaf4ff, 0.16, 16, 2);
+        light.position.set(point[0], point[1], point[2]);
+        scene.add(light);
+      });
+
+      buildStore();
+      buildOutdoorHome();
+      buildProductInstances();
+      buildCheckoutAndCarts();
+      createHud();
+      animate();
+    }
+
+    function standard(color, roughness) {
+      return new THREE.MeshStandardMaterial({ color: color, roughness: roughness === undefined ? 0.78 : roughness });
+    }
+
+    function addBox(parent, size, position, color, options) {
+      const opts = options || {};
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(size[0], size[1], size[2]), standard(color, opts.roughness));
+      mesh.position.set(position[0], position[1], position[2]);
+      mesh.castShadow = !!opts.castShadow;
+      mesh.receiveShadow = !!opts.receiveShadow;
+      parent.add(mesh);
+      return mesh;
+    }
+
+    function makeTileTexture() {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#edf0f1";
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = "#c5ccd0";
+      ctx.lineWidth = 3;
+      for (let x = 0; x <= 256; x += 64) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke(); }
+      for (let y = 0; y <= 256; y += 64) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y); ctx.stroke(); }
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(12, 18);
+      texture.encoding = THREE.sRGBEncoding;
+      return texture;
+    }
+
+    function buildStore() {
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 88), new THREE.MeshStandardMaterial({ map: makeTileTexture(), roughness: 0.82 }));
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.set(0, 0, 10);
+      floor.receiveShadow = true;
+      scene.add(floor);
+      addBox(scene, [40, 6, .35], [0, 3, -28.15], "#eef1f3", { receiveShadow: true });
+      addBox(scene, [.35, 6, 88], [-20, 3, 10], "#e5e9ec", { receiveShadow: true });
+      addBox(scene, [.35, 6, 88], [20, 3, 10], "#e5e9ec", { receiveShadow: true });
+      addBox(scene, [40, .25, 88], [0, 6, 10], "#fafbfc");
+      addBox(scene, [40, .18, .18], [0, 5.8, -27.85], "#d5dce1");
+      addBox(scene, [39.9, .16, .04], [0, 4.18, -27.92], "#1654a0");
+      addBox(scene, [39.9, .11, .04], [0, 3.92, -27.93], "#e33c4b");
+
+      for (let z = -22; z <= 22; z += 8.8) {
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(2.6, .06, .25), new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#f4f8ff", emissiveIntensity: .38 }));
+        strip.position.set(0, 5.82, z);
+        scene.add(strip);
+        for (let x of [-12, 0, 12]) {
+          const light = new THREE.PointLight(0xf5f8ff, 0.1, 10, 2);
+          light.position.set(x, 5.25, z);
+          scene.add(light);
+        }
+      }
+
+      addWallSign();
+      categories.forEach(category => buildShelf(category));
+      buildPlantsAndDetails();
+    }
+
+    function buildOutdoorHome() {
+      const path = new THREE.Mesh(
+        new THREE.PlaneGeometry(12, 27),
+        new THREE.MeshStandardMaterial({ color: "#cfd8c7", roughness: .9 })
+      );
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(0, .045, 41);
+      path.receiveShadow = true;
+      scene.add(path);
+      addBox(scene, [40, .08, 27], [0, -.02, 41], "#a9c399", { receiveShadow: true });
+      addBox(scene, [12.4, .1, 27], [0, .02, 41], "#cfd8c7", { receiveShadow: true });
+
+      addBox(scene, [.45, 4.2, .45], [-7.8, 2.1, 28.4], "#2e6f4a", { castShadow: true });
+      addBox(scene, [.45, 4.2, .45], [7.8, 2.1, 28.4], "#2e6f4a", { castShadow: true });
+      addBox(scene, [16.5, .45, .55], [0, 4.15, 28.4], "#2e6f4a", { castShadow: true });
+      const exitSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(5.2, .72),
+        new THREE.MeshBasicMaterial({ map: makeSignTexture("EXIT  ·  HOME", true, "#2e6f4a"), toneMapped: false })
+      );
+      exitSign.position.set(0, 3.55, 28.1);
+      exitSign.rotation.y = Math.PI;
+      scene.add(exitSign);
+
+      addBox(scene, [8.2, 4.1, 4.8], [-8.7, 2.05, 41.5], "#f2dfbd", { castShadow: true, receiveShadow: true });
+      addBox(scene, [9.2, .55, 5.5], [-8.7, 4.35, 41.5], "#b96048", { castShadow: true });
+      addBox(scene, [1.25, 2.3, .12], [-8.7, 1.15, 39.05], "#6b4736", { castShadow: true });
+      addBox(scene, [.16, .16, .08], [-8.25, 1.15, 38.96], "#e6bd52");
+      [[-11, 2.35], [-6.4, 2.35]].forEach(item => {
+        addBox(scene, [1.35, 1.05, .1], [item[0], item[1], 39.04], "#8dc5d0", { castShadow: true });
+        addBox(scene, [.08, 1.05, .13], [item[0], item[1], 38.96], "#fff8e9");
+        addBox(scene, [1.35, .08, .13], [item[0], item[1], 38.96], "#fff8e9");
+      });
+      const homeSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(3.2, .55),
+        new THREE.MeshBasicMaterial({ map: makeSignTexture("MY HOME", true, "#b96048"), toneMapped: false })
+      );
+      homeSign.position.set(-8.7, 3.55, 39.02);
+      homeSign.rotation.y = Math.PI;
+      scene.add(homeSign);
+      addBox(scene, [1.8, .12, 1], [-8.7, .06, 38.35], "#d9b07d", { receiveShadow: true });
+
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.18, .24, 1.6, 8), standard("#76543d"));
+      trunk.position.set(7.5, .8, 42);
+      trunk.castShadow = true;
+      scene.add(trunk);
+      const tree = new THREE.Mesh(new THREE.SphereGeometry(1.35, 12, 9), standard("#5a9c63"));
+      tree.position.set(7.5, 2.25, 42);
+      tree.scale.y = 1.15;
+      tree.castShadow = true;
+      scene.add(tree);
+    }
+
+    function makeSignTexture(text, small, backgroundColor) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 128;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = backgroundColor || "#217b48";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(255,255,255,.12)";
+      ctx.beginPath(); ctx.arc(455, 30, 82, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = small ? "700 36px Arial" : "800 42px Arial";
+      ctx.fillText(text, 256, 65);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.encoding = THREE.sRGBEncoding;
+      return texture;
+    }
+
+    function addWallSign() {
+      addBox(scene, [8, 1.25, .18], [0, 4.55, -27.9], "#1654a0");
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(7.6, 1.02),
+        new THREE.MeshBasicMaterial({ map: makeSignTexture("FRESHMART 3D"), toneMapped: false })
+      );
+      plane.position.set(0, 4.55, -27.79);
+      scene.add(plane);
+    }
+
+    function buildShelf(category) {
+      const x = category.position[0], z = category.position[1];
+      const facing = x < 0 ? Math.PI / 2 : -Math.PI / 2;
+      const shelf = new THREE.Group();
+      shelf.position.set(x, 0, z);
+      shelf.rotation.y = facing;
+      scene.add(shelf);
+
+      const shelfMaterial = standard("#e6eaed", .52);
+      const legMaterial = standard("#315e91", .48);
+      addBox(shelf, [6.2, 2.45, .1], [0, 1.86, -.56], "#f3f5f6");
+      [-3.02, 3.02].forEach(dx => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(.12, 3.55, .12), legMaterial);
+        leg.position.set(dx, 1.8, 0);
+        leg.castShadow = true;
+        shelf.add(leg);
+        addBox(shelf, [.17, .18, 1.18], [dx, .25, 0], "#64798b");
+      });
+      [0.65, 1.45, 2.25, 3.05].forEach(y => {
+        const board = new THREE.Mesh(new THREE.BoxGeometry(6.2, .12, 1.08), shelfMaterial);
+        board.position.set(0, y, 0);
+        board.castShadow = true;
+        board.receiveShadow = true;
+        shelf.add(board);
+        addBox(shelf, [6.14, .045, .055], [0, y - .035, .54], "#315e91");
+      });
+      addBox(shelf, [6.4, .48, .18], [0, 3.55, .47], "#1654a0");
+      addBox(shelf, [6.24, .065, .2], [0, 3.27, .47], "#e33c4b");
+      const sign = new THREE.Mesh(
+        new THREE.PlaneGeometry(6.1, .34),
+        new THREE.MeshBasicMaterial({ map: makeSignTexture(category.name.toUpperCase(), true, "#1654a0"), toneMapped: false })
+      );
+      sign.position.set(0, 3.55, .57);
+      shelf.add(sign);
+      addBox(shelf, [.18, 3.1, .14], [-3.12, 1.85, .53], "#315e91");
+      addBox(shelf, [.18, 3.1, .14], [3.12, 1.85, .53], "#315e91");
+    }
+
+    function buildPlantsAndDetails() {
+      [-17.2, 17.2].forEach(x => {
+        [-22, -4, 12].forEach(z => {
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(.42, .34, .62, 8), standard("#b8754e"));
+          pot.position.set(x, .31, z);
+          pot.castShadow = true;
+          scene.add(pot);
+          const leaves = new THREE.Mesh(new THREE.SphereGeometry(.66, 9, 7), standard("#4e9360"));
+          leaves.position.set(x, .95, z);
+          leaves.scale.y = 1.35;
+          leaves.castShadow = true;
+          scene.add(leaves);
+        });
+      });
+      for (let i = 0; i < 7; i++) {
+        addBox(scene, [.07, .08, .08], [-15 + i * 5, 5.2, -27.7], i % 2 ? "#e6ac58" : "#69a879");
+      }
+    }
+
+    function buildProductInstances() {
+      const grouped = { box: [], cylinder: [], sphere: [] };
+      products.forEach(product => {
+        const category = categories.find(item => item.name === product.category);
+        const facing = category.position[0] < 0 ? Math.PI / 2 : -Math.PI / 2;
+        const categoryProducts = products.filter(item => item.category === product.category);
+        const shelfSlot = categoryProducts.findIndex(item => item.id === product.id);
+        const levels = [.93, 1.73, 2.53];
+        levels.forEach((y, levelIndex) => {
+          for (let facingIndex = 0; facingIndex < 2; facingIndex++) {
+            const rackSpacing = categoryProducts.length > 6 ? .78 : .95;
+            const localX = (shelfSlot - (categoryProducts.length - 1) / 2) * rackSpacing + (facingIndex ? .23 : -.23);
+            const localZ = (levelIndex - 1) * .08;
+            const x = category.position[0] + Math.cos(facing) * localX + Math.sin(facing) * localZ;
+            const z = category.position[1] - Math.sin(facing) * localX + Math.cos(facing) * localZ;
+            grouped[product.kind].push({
+              product: product,
+              position: [x, y, z],
+              rotation: facing,
+              isDisplayCopy: levelIndex === 0 && facingIndex === 0
+            });
+          }
+        });
+      });
+      const geometries = {
+        box: new THREE.BoxGeometry(.44, .55, .4),
+        cylinder: new THREE.CylinderGeometry(.19, .19, .56, 12),
+        sphere: new THREE.SphereGeometry(.22, 12, 9)
+      };
+      Object.keys(grouped).forEach(kind => {
+        const items = grouped[kind];
+        if (!items.length) return;
+        const mesh = new THREE.InstancedMesh(geometries[kind], new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: .48, emissive: "#242424", emissiveIntensity: .08 }), items.length);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        const dummy = new THREE.Object3D();
+        const colors = new THREE.Color();
+        instanceProductIds[kind] = [];
+        items.forEach((item, index) => {
+          dummy.position.set(item.position[0], item.position[1], item.position[2]);
+          dummy.rotation.set(0, item.rotation, 0);
+          dummy.updateMatrix();
+          mesh.setMatrixAt(index, dummy.matrix);
+          colors.set(item.product.color);
+          colors.offsetHSL(0, .25, 0);
+          mesh.setColorAt(index, colors);
+          instanceProductIds[kind][index] = item.product.id;
+          if (kind !== "sphere" && item.isDisplayCopy) {
+            addProductLabel(item.product, item.position, kind, item.rotation);
+          } else if (kind === "sphere" && item.isDisplayCopy && item.product.category === "Fruits & Vegetables") {
+            addFruitStem(item.position, item.product.color);
+          }
+        });
+        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+        mesh.userData.kind = kind;
+        scene.add(mesh);
+        productMeshes.push(mesh);
+      });
+    }
+
+    function addProductLabel(product, position, kind, rotation) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 128; canvas.height = 64;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "rgba(255,255,255,.88)";
+      ctx.beginPath(); ctx.roundRect(4, 7, 120, 50, 10); ctx.fill();
+      ctx.fillStyle = "#365040";
+      ctx.font = "700 14px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const words = product.name.split(" ");
+      let first = product.name;
+      let second = "";
+      if (product.name.length > 13 && words.length > 1) {
+        const split = Math.ceil(words.length / 2);
+        first = words.slice(0, split).join(" ");
+        second = words.slice(split).join(" ");
+      }
+      ctx.fillText(first.slice(0, 15), 64, second ? 26 : 33);
+      if (second) { ctx.font = "700 12px Arial"; ctx.fillText(second.slice(0, 15), 64, 43); }
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.encoding = THREE.sRGBEncoding;
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(kind === "cylinder" ? .32 : .38, .19), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }));
+      const front = kind === "cylinder" ? .2 : .21;
+      label.position.set(position[0] + Math.sin(rotation) * front, position[1], position[2] + Math.cos(rotation) * front);
+      label.rotation.y = rotation;
+      scene.add(label);
+    }
+
+    function addFruitStem(position, color) {
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(.025, .04, .1, 5), standard("#607d3e"));
+      stem.position.set(position[0], position[1] + .27, position[2]);
+      scene.add(stem);
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(.055, 6, 5), standard(color));
+      leaf.scale.set(1.6, .35, .7);
+      leaf.position.set(position[0] + .04, position[1] + .32, position[2]);
+      scene.add(leaf);
+    }
+
+    function buildCheckoutAndCarts() {
+      addBox(scene, [4.6, 1.05, 1.15], [9, .55, 25.2], "#436d50", { castShadow: true });
+      addBox(scene, [4.7, .14, 1.22], [9, 1.12, 25.2], "#d9bd8f", { castShadow: true });
+      addBox(scene, [1.1, .12, .72], [7.6, 1.25, 25.15], "#323e36");
+      addBox(scene, [.68, .09, .43], [7.55, 1.36, 25.13], "#87c18c");
+      const belt = new THREE.Mesh(new THREE.BoxGeometry(1.12, .04, .68), standard("#515e55"));
+      belt.position.set(7.6, 1.34, 25.15);
+      scene.add(belt);
+      addBox(scene, [.52, .16, .38], [8.35, 1.38, 24.9], "#26342d", { castShadow: true });
+      addBox(scene, [.42, .03, .27], [8.35, 1.48, 24.89], "#8ed1a0");
+      addBox(scene, [.12, .3, .04], [8.95, 1.48, 25.12], "#fff8e9");
+      addBox(scene, [.12, .3, .04], [9.1, 1.48, 25.12], "#fff8e9");
+      const cartPositions = [[-8.5, 25.1], [-5.8, 25.1]];
+      cartPositions.forEach(position => buildCart(position[0], position[1]));
+      const checkoutSign = new THREE.Mesh(new THREE.PlaneGeometry(3.6, .62), new THREE.MeshBasicMaterial({ map: makeSignTexture("PAY  ·  COLLECT", true), toneMapped: false }));
+      checkoutSign.position.set(9, 2.1, 24.5);
+      checkoutSign.rotation.y = Math.PI;
+      scene.add(checkoutSign);
+    }
+
+    function buildCart(x, z) {
+      const group = new THREE.Group();
+      group.position.set(x, 0, z);
+      group.scale.set(.75, .75, .75);
+      scene.add(group);
+      const orange = standard("#ff8500", .42);
+      const darkMetal = standard("#46534b", .48);
+      const addRod = (start, end, radius, material) => {
+        const from = new THREE.Vector3(start[0], start[1], start[2]);
+        const to = new THREE.Vector3(end[0], end[1], end[2]);
+        const direction = to.clone().sub(from);
+        const rod = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, direction.length(), 8),
+          material
+        );
+        rod.position.copy(from).add(to).multiplyScalar(.5);
+        rod.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+        rod.castShadow = true;
+        group.add(rod);
+        return rod;
+      };
+
+      // Open wire basket, widened at the top like the reference trolley.
+      const frontBottom = [-.47, .76, -.42], frontTop = [-.58, 1.55, -.55];
+      const backBottom = [.47, .76, .42], backTop = [.58, 1.55, .55];
+      const corners = [
+        [[-.47, .76, -.42], [-.58, 1.55, -.55]],
+        [[.47, .76, -.42], [.58, 1.55, -.55]],
+        [[-.47, .76, .42], [-.58, 1.55, .55]],
+        [[.47, .76, .42], [.58, 1.55, .55]]
+      ];
+      corners.forEach(pair => addRod(pair[0], pair[1], .026, orange));
+      [frontBottom, frontTop].forEach((line, index) => {
+        const y = index ? 1.55 : .76, z = index ? -.55 : -.42, width = index ? .58 : .47;
+        addRod([-width, y, z], [width, y, z], .035, orange);
+      });
+      [.76, 1.02, 1.28, 1.55].forEach(y => {
+        const t = (y - .76) / .79;
+        const width = .47 + t * .11;
+        const frontZ = -.42 - t * .13;
+        const backZ = .42 + t * .13;
+        addRod([-width, y, frontZ], [width, y, frontZ], .022, orange);
+        addRod([-width, y, backZ], [width, y, backZ], .022, orange);
+        if (y < 1.55) {
+          for (let i = 1; i < 6; i++) {
+            const railX = -width + (width * 2 * i) / 6;
+            addRod([railX, y, frontZ], [railX, Math.min(1.55, y + .26), frontZ - .043], .022, orange);
+            addRod([railX, y, backZ], [railX, Math.min(1.55, y + .26), backZ + .043], .022, orange);
+          }
+        }
+      });
+      [-.47, .47].forEach(xSide => {
+        [.76, 1.02, 1.28, 1.55].forEach(y => {
+          const t = (y - .76) / .79;
+          addRod([xSide * (1 + t * .23), y, -.42 - t * .13], [xSide * (1 + t * .23), y, .42 + t * .13], .022, orange);
+        });
+        for (let i = 1; i < 5; i++) {
+          const zSide = -.42 + i * .168;
+          addRod([xSide, .76, zSide], [xSide * 1.23, 1.55, zSide * 1.31], .022, orange);
+        }
+      });
+
+      // Long lower chassis and high rear handle.
+      addRod([-.49, .69, -.47], [.49, .69, -.47], .045, orange);
+      addRod([-.49, .69, -.47], [-.49, .25, .48], .045, orange);
+      addRod([.49, .69, -.47], [.49, .25, .48], .045, orange);
+      addRod([-.49, .25, .48], [.49, .25, .48], .045, orange);
+      addRod([-.49, .25, .48], [-.49, .35, .82], .045, orange);
+      addRod([.49, .25, .48], [.49, .35, .82], .045, orange);
+      addRod([-.49, .35, .82], [.49, .35, .82], .05, orange);
+      addRod([-.49, 1.52, .47], [-.49, 2.02, .94], .05, orange);
+      addRod([.49, 1.52, .47], [.49, 2.02, .94], .05, orange);
+      addRod([-.49, 2.02, .94], [.49, 2.02, .94], .065, orange);
+
+      const wheels = [];
+      [-.49, .49].forEach(dx => [-.31, .54].forEach(wheelZ => {
+        const wheelMount = new THREE.Group();
+        wheelMount.position.set(dx, .16, wheelZ);
+        const tire = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, .09, 12), darkMetal);
+        tire.rotation.z = Math.PI / 2;
+        tire.castShadow = true;
+        wheelMount.add(tire);
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(.065, .065, .096, 10), orange);
+        hub.rotation.z = Math.PI / 2;
+        wheelMount.add(hub);
+        group.add(wheelMount);
+        wheels.push(wheelMount);
+      }));
+
+      [[-.22, "#e6504b"], [0, "#f2bf3f"], [.22, "#63a85e"]].forEach(item => {
+        const produce = new THREE.Mesh(new THREE.SphereGeometry(.14, 10, 8), standard(item[1], .45));
+        produce.position.set(item[0], 1.08, -.04);
+        produce.castShadow = true;
+        group.add(produce);
+      });
+      const bag = new THREE.Mesh(new THREE.BoxGeometry(.2, .28, .18), standard("#87b8d5", .55));
+      bag.position.set(.28, 1.0, -.13);
+      bag.rotation.y = -.2;
+      bag.castShadow = true;
+      group.add(bag);
+      const hitbox = new THREE.Mesh(
+        new THREE.BoxGeometry(1.25, 1.85, 1.45),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, colorWrite: false, depthWrite: false })
+      );
+      hitbox.position.set(0, 1.13, .2);
+      hitbox.userData.visualCart = true;
+      group.add(hitbox);
+      const contentGroup = new THREE.Group();
+      group.add(contentGroup);
+      visualCarts.push({ group: group, hitbox: hitbox, contentGroup: contentGroup, wheels: wheels });
+    }
+
+    // HUD and product search/navigation.
+    function createHud() {
+      const categoryFilter = document.getElementById("categoryFilter");
+      const aisleList = document.getElementById("aisleList");
+      categories.forEach((category, index) => {
+        const option = document.createElement("option");
+        option.value = category.name;
+        option.textContent = category.name;
+        categoryFilter.appendChild(option);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "aisle-button";
+        button.dataset.category = category.name;
+        button.innerHTML = '<span class="aisle-emoji">' + category.icon + '</span><span>' + category.name + '</span>';
+        button.addEventListener("click", () => {
+          jumpToCategory(category.name);
+          openCategoryDrawer(category.name);
+        });
+        aisleList.appendChild(button);
+      });
+      categoryFilter.addEventListener("change", () => {
+        const value = categoryFilter.value;
+        document.querySelectorAll(".aisle-button").forEach(button => {
+          button.classList.toggle("active", value !== "all" && button.dataset.category === value);
+        });
+        if (value !== "all") {
+          jumpToCategory(value);
+          openCategoryDrawer(value);
+        } else {
+          activeCategory = null;
+          closeCategoryDrawer();
+        }
+      });
+      document.getElementById("categoryDrawerClose").addEventListener("click", closeCategoryDrawer);
+      document.getElementById("categoryScrim").addEventListener("click", closeCategoryDrawer);
+      document.getElementById("searchForm").addEventListener("submit", event => {
+        event.preventDefault();
+        showSearchResults(document.getElementById("searchInput").value);
+      });
+      document.getElementById("searchInput").addEventListener("input", event => showSearchResults(event.target.value));
+      document.addEventListener("pointerdown", event => {
+        if (!document.querySelector(".search-card").contains(event.target)) setSearchResultsOpen(false);
+      });
+      document.getElementById("startButton").addEventListener("click", () => {
+        document.getElementById("startOverlay").classList.add("hidden");
+        renderer.domElement.focus({ preventScroll: true });
+      });
+      document.getElementById("helpButton").addEventListener("click", () => {
+        document.getElementById("startOverlay").classList.remove("hidden");
+        document.getElementById("startButton").focus({ preventScroll: true });
+      });
+      document.getElementById("productClose").addEventListener("click", closeProduct);
+      document.getElementById("productModal").addEventListener("click", event => { if (event.target.id === "productModal") closeProduct(); });
+      document.getElementById("addToCart").addEventListener("click", () => { if (selectedProduct) { addToCart(selectedProduct.id); closeProduct(); } });
+      document.getElementById("cartButton").addEventListener("click", openCart);
+      document.getElementById("drawerClose").addEventListener("click", closeCart);
+      document.getElementById("drawerScrim").addEventListener("click", closeCart);
+      document.getElementById("checkoutButton").addEventListener("click", openCheckout);
+      document.getElementById("checkoutClose").addEventListener("click", closeCheckout);
+      document.getElementById("checkoutModal").addEventListener("click", event => {
+        if (event.target.id === "checkoutModal") closeCheckout();
+      });
+      document.getElementById("checkoutForm").addEventListener("submit", submitOrder);
+      document.getElementById("doneButton").addEventListener("click", () => {
+        document.getElementById("checkoutModal").classList.add("hidden");
+        document.getElementById("successState").classList.remove("show");
+        document.getElementById("checkoutFields").style.display = "";
+        closeCart();
+        document.getElementById("cartButton").focus({ preventScroll: true });
+      });
+      document.getElementById("soundButton").addEventListener("click", toggleAmbience);
+      bindSceneControls();
+      renderCart();
+      const loaderStart = performance.now();
+      const loaderTimer = setInterval(() => {
+        const amount = Math.min(100, Math.round((performance.now() - loaderStart) / 10));
+        document.getElementById("progressFill").style.width = amount + "%";
+        document.getElementById("loaderPercent").textContent = amount + "%";
+        if (amount === 100) {
+          clearInterval(loaderTimer);
+          setTimeout(() => {
+            document.getElementById("loader").classList.add("done");
+            document.getElementById("startButton").focus({ preventScroll: true });
+          }, 140);
+        }
+      }, 20);
+    }
+
+    function showSearchResults(query) {
+      const results = document.getElementById("searchResults");
+      const value = query.trim().toLowerCase();
+      results.innerHTML = "";
+      if (!value) { setSearchResultsOpen(false); return; }
+      const matches = products.filter(product => product.name.toLowerCase().includes(value) || product.category.toLowerCase().includes(value)).slice(0, 6);
+      if (!matches.length) {
+        results.innerHTML = '<div class="no-results">No fresh finds yet. Try another search.</div>';
+      } else {
+        matches.forEach(product => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "search-result";
+          button.innerHTML = '<span class="result-swatch" style="background:' + product.color + '"></span><span class="result-copy"><span class="result-name">' + product.name + '</span><span class="result-category">' + product.category + '</span></span><span class="result-price">' + money(product.price) + '</span>';
+          button.addEventListener("click", () => {
+            setSearchResultsOpen(false);
+            document.getElementById("searchInput").value = product.name;
+            jumpToProduct(product);
+          });
+          results.appendChild(button);
+        });
+      }
+      setSearchResultsOpen(true);
+    }
+
+    function setSearchResultsOpen(open) {
+      document.getElementById("searchResults").classList.toggle("open", open);
+      document.getElementById("searchInput").setAttribute("aria-expanded", String(open));
+    }
+
+    function openCategoryDrawer(categoryName) {
+      const category = categories.find(item => item.name === categoryName);
+      if (!category) return;
+      closeCart();
+      const drawer = document.getElementById("categoryDrawer");
+      const list = document.getElementById("categoryProducts");
+      const categoryProducts = products.filter(product => product.category === categoryName);
+      document.getElementById("categoryDrawerTitle").textContent = category.name;
+      document.getElementById("categoryDrawerDescription").textContent = categoryProducts.length + " fresh finds in this department";
+      list.replaceChildren();
+      categoryProducts.forEach(product => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "category-product";
+        button.setAttribute("aria-label", "Find " + product.name + " for " + money(product.price));
+        const swatch = document.createElement("span");
+        swatch.className = "category-product-swatch";
+        swatch.style.background = "linear-gradient(145deg, #fff 0%, " + product.color + " 100%)";
+        swatch.textContent = product.emoji;
+        const copy = document.createElement("span");
+        copy.className = "category-product-copy";
+        const name = document.createElement("span");
+        name.className = "category-product-name";
+        name.textContent = product.name;
+        const price = document.createElement("span");
+        price.className = "category-product-price";
+        price.textContent = money(product.price);
+        copy.append(name, price);
+        const arrow = document.createElement("span");
+        arrow.className = "category-product-arrow";
+        arrow.setAttribute("aria-hidden", "true");
+        arrow.textContent = "→";
+        button.append(swatch, copy, arrow);
+        button.addEventListener("click", () => jumpToProduct(product));
+        list.appendChild(button);
+      });
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+      drawer.removeAttribute("inert");
+      document.getElementById("categoryScrim").classList.add("open");
+      document.getElementById("categoryScrim").setAttribute("aria-hidden", "false");
+      document.getElementById("categoryDrawerClose").focus({ preventScroll: true });
+    }
+
+    function closeCategoryDrawer() {
+      const drawer = document.getElementById("categoryDrawer");
+      const wasOpen = drawer.classList.contains("open");
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+      drawer.setAttribute("inert", "");
+      document.getElementById("categoryScrim").classList.remove("open");
+      document.getElementById("categoryScrim").setAttribute("aria-hidden", "true");
+      if (wasOpen) document.getElementById("categoryFilter").focus({ preventScroll: true });
+    }
+
+    function trapDialogFocus(event) {
+      const candidates = [
+        document.getElementById("startOverlay").classList.contains("hidden") ? null : document.getElementById("startOverlay"),
+        document.getElementById("productModal").classList.contains("hidden") ? null : document.getElementById("productModal"),
+        document.getElementById("categoryDrawer").classList.contains("open") ? document.getElementById("categoryDrawer") : null,
+        document.getElementById("cartDrawer").classList.contains("open") ? document.getElementById("cartDrawer") : null,
+        document.getElementById("checkoutModal").classList.contains("hidden") ? null : document.getElementById("checkoutModal")
+      ];
+      const dialog = candidates.filter(Boolean).pop();
+      if (!dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex="0"]'))
+        .filter(element => element.getClientRects().length > 0);
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function jumpToProduct(product) {
+      const category = categories.find(item => item.name === product.category);
+      if (category) {
+        closeCategoryDrawer();
+        document.getElementById("searchInput").value = product.name;
+        setSearchResultsOpen(false);
+        jumpToCategory(product.category, product);
+      }
+    }
+
+    function jumpToCategory(categoryName, targetProduct) {
+      const category = categories.find(item => item.name === categoryName);
+      if (!category) return;
+      activeCategory = categoryName;
+      pendingProduct = targetProduct || null;
+      document.querySelectorAll(".aisle-button").forEach(button => button.classList.toggle("active", button.dataset.category === categoryName));
+      document.getElementById("categoryFilter").value = categoryName;
+      const productIndex = targetProduct ? products.filter(p => p.category === categoryName).findIndex(p => p.id === targetProduct.id) : 0;
+      const facing = category.position[0] < 0 ? Math.PI / 2 : -Math.PI / 2;
+      const categoryProductCount = products.filter(p => p.category === categoryName).length;
+      const rackSpacing = categoryProductCount > 6 ? .78 : .95;
+      const localOffset = targetProduct ? (productIndex - (categoryProductCount - 1) / 2) * rackSpacing : 0;
+      const targetZ = category.position[1] - Math.sin(facing) * localOffset;
+      const destination = new THREE.Vector3(0, 1.68, targetZ + 3.5);
+      const lookAt = new THREE.Vector3(category.position[0], 1.85, targetZ);
+      const direction = lookAt.clone().sub(destination).normalize();
+      cameraTarget = { position: destination, yaw: Math.atan2(-direction.x, -direction.z), pitch: Math.asin(direction.y) };
+      showToast("Heading to " + categoryName);
+    }
+
+    // First-person movement, drag-look, product raycasting and mobile joystick.
+    function bindSceneControls() {
+      const canvas = renderer.domElement;
+      canvas.addEventListener("pointerdown", event => {
+        if (event.button !== 0 || event.target !== canvas || !document.getElementById("startOverlay").classList.contains("hidden")) return;
+        dragging = true;
+        pointerMoved = false;
+        lastPointer = { x: event.clientX, y: event.clientY };
+        canvas.setPointerCapture(event.pointerId);
+      });
+      canvas.addEventListener("pointermove", event => {
+        if (dragging) {
+          const dx = event.clientX - lastPointer.x, dy = event.clientY - lastPointer.y;
+          if (Math.abs(dx) + Math.abs(dy) > 2) pointerMoved = true;
+          yaw -= dx * .0032;
+          pitch = THREE.MathUtils.clamp(pitch - dy * .0025, -1.05, 1.05);
+          lastPointer = { x: event.clientX, y: event.clientY };
+          camera.rotation.set(pitch, yaw, 0);
+        } else if (event.pointerType === "mouse") {
+          updateHover(event.clientX, event.clientY);
+        }
+      });
+      canvas.addEventListener("pointerup", event => {
+        if (!dragging) return;
+        dragging = false;
+        if (!pointerMoved) pickProduct(event.clientX, event.clientY);
+      });
+      canvas.addEventListener("pointercancel", () => { dragging = false; });
+      canvas.addEventListener("pointerleave", () => {
+        clearHoveredInstance();
+        document.getElementById("hoverTag").classList.remove("show");
+      });
+      window.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          setSearchResultsOpen(false);
+          closeCategoryDrawer();
+          closeProduct();
+          closeCart();
+          closeCheckout();
+          return;
+        }
+        if (event.key === "Tab") trapDialogFocus(event);
+        if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+        const key = event.key.toLowerCase();
+        if (key === "c" && document.getElementById("startOverlay").classList.contains("hidden") &&
+            document.getElementById("productModal").classList.contains("hidden") &&
+            document.getElementById("checkoutModal").classList.contains("hidden") &&
+            !document.getElementById("cartDrawer").classList.contains("open") &&
+            !document.getElementById("categoryDrawer").classList.contains("open")) {
+          setDriveMode(!driveMode);
+          event.preventDefault();
+          return;
+        }
+        if (["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
+          keys.add(key);
+          event.preventDefault();
+        }
+      });
+      window.addEventListener("keyup", event => keys.delete(event.key.toLowerCase()));
+      window.addEventListener("blur", () => keys.clear());
+      document.getElementById("joystick").addEventListener("pointerdown", event => {
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        updateJoystick(event);
+      });
+      document.getElementById("joystick").addEventListener("pointermove", event => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) updateJoystick(event);
+      });
+      const resetJoystick = () => {
+        moveForward = 0; moveSide = 0;
+        document.getElementById("joystickKnob").style.transform = "translate(0,0)";
+      };
+      document.getElementById("joystick").addEventListener("pointerup", resetJoystick);
+      document.getElementById("joystick").addEventListener("pointercancel", resetJoystick);
+      document.getElementById("driveToggle").addEventListener("click", () => setDriveMode(!driveMode));
+      window.addEventListener("resize", onResize);
+    }
+
+    function setDriveMode(enabled) {
+      driveMode = enabled;
+      keys.clear();
+      moveForward = 0;
+      moveSide = 0;
+      document.getElementById("joystickKnob").style.transform = "translate(0,0)";
+      const button = document.getElementById("driveToggle");
+      button.setAttribute("aria-pressed", String(driveMode));
+      button.querySelector("span").textContent = driveMode ? "Follow me" : "Drive cart";
+      button.title = driveMode ? "Let the cart follow you (C)" : "Drive the shopping cart with WASD or arrows (C)";
+      showToast(driveMode ? "Cart driving · WASD, arrows, or joystick" : "Your cart will follow you");
+    }
+
+    function updateJoystick(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const dx = event.clientX - (rect.left + rect.width / 2);
+      const dy = event.clientY - (rect.top + rect.height / 2);
+      const length = Math.min(29, Math.hypot(dx, dy));
+      const angle = Math.atan2(dy, dx);
+      const x = Math.cos(angle) * length, y = Math.sin(angle) * length;
+      document.getElementById("joystickKnob").style.transform = "translate(" + x + "px," + y + "px)";
+      moveSide = x / 29;
+      moveForward = -y / 29;
+    }
+
+    function updateMovement(delta) {
+      if (cameraTarget) {
+        const distance = camera.position.distanceTo(cameraTarget.position);
+        const alpha = 1 - Math.exp(-delta * 3.2);
+        camera.position.lerp(cameraTarget.position, alpha);
+        let yawDifference = cameraTarget.yaw - yaw;
+        while (yawDifference > Math.PI) yawDifference -= Math.PI * 2;
+        while (yawDifference < -Math.PI) yawDifference += Math.PI * 2;
+        yaw += yawDifference * alpha;
+        pitch += (cameraTarget.pitch - pitch) * alpha;
+        camera.rotation.set(pitch, yaw, 0);
+        if (distance < .12) {
+          camera.position.copy(cameraTarget.position);
+          yaw = cameraTarget.yaw;
+          pitch = cameraTarget.pitch;
+          camera.rotation.set(pitch, yaw, 0);
+          cameraTarget = null;
+          if (pendingProduct) {
+            const product = pendingProduct;
+            pendingProduct = null;
+            openProduct(product);
+          }
+        }
+      }
+      const controlsEnabled = document.getElementById("startOverlay").classList.contains("hidden") &&
+        document.getElementById("productModal").classList.contains("hidden") &&
+        document.getElementById("checkoutModal").classList.contains("hidden") &&
+        !document.getElementById("cartDrawer").classList.contains("open") &&
+        !document.getElementById("categoryDrawer").classList.contains("open");
+      if (controlsEnabled) {
+        const forward = Number(keys.has("w") || keys.has("arrowup")) - Number(keys.has("s") || keys.has("arrowdown")) + moveForward;
+        const side = Number(keys.has("d") || keys.has("arrowright")) - Number(keys.has("a") || keys.has("arrowleft")) + moveSide;
+        const length = Math.hypot(forward, side);
+        if (length > .05) {
+          const speed = 3.1 * delta / Math.max(1, length);
+          const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * side) * speed;
+          const dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * side) * speed;
+          if (driveMode) {
+            moveCart(dx, dz, delta);
+          } else {
+            camera.position.x = THREE.MathUtils.clamp(camera.position.x + dx, -18.4, 18.4);
+            camera.position.z = THREE.MathUtils.clamp(camera.position.z + dz, -26.4, 53);
+          }
+        }
+      }
+      updateCartFollow(delta, controlsEnabled);
+    }
+
+    function moveCart(dx, dz, delta) {
+      const cart = visualCarts[0];
+      if (!cart) return;
+      const previousX = cart.group.position.x;
+      const previousZ = cart.group.position.z;
+      cart.group.position.x = THREE.MathUtils.clamp(previousX + dx, -18.4, 18.4);
+      cart.group.position.z = THREE.MathUtils.clamp(previousZ + dz, -26.4, 53);
+      steerCart(cart, cart.group.position.x - previousX, cart.group.position.z - previousZ, delta);
+    }
+
+    function updateCartFollow(delta, controlsEnabled) {
+      const cart = visualCarts[0];
+      if (!cart || driveMode || !controlsEnabled) return;
+      const targetX = THREE.MathUtils.clamp(camera.position.x - Math.sin(yaw) * 2.15 + Math.cos(yaw) * 1.05, -18.4, 18.4);
+      const targetZ = THREE.MathUtils.clamp(camera.position.z - Math.cos(yaw) * 2.15 - Math.sin(yaw) * 1.05, -26.4, 53);
+      const previousX = cart.group.position.x;
+      const previousZ = cart.group.position.z;
+      const alpha = 1 - Math.exp(-5.2 * delta);
+      cart.group.position.x += (targetX - previousX) * alpha;
+      cart.group.position.z += (targetZ - previousZ) * alpha;
+      steerCart(cart, cart.group.position.x - previousX, cart.group.position.z - previousZ, delta);
+    }
+
+    function steerCart(cart, dx, dz, delta) {
+      const distance = Math.hypot(dx, dz);
+      if (distance < .0001) return;
+      const targetRotation = Math.atan2(dx, dz);
+      let rotationDelta = targetRotation - cart.group.rotation.y;
+      while (rotationDelta > Math.PI) rotationDelta -= Math.PI * 2;
+      while (rotationDelta < -Math.PI) rotationDelta += Math.PI * 2;
+      const turn = 1 - Math.exp(-10 * delta);
+      cart.group.rotation.y += rotationDelta * turn;
+      cart.wheels.forEach(wheel => { wheel.rotation.x += distance / .105; });
+    }
+
+    function updateHover(clientX, clientY) {
+      if (!document.getElementById("startOverlay").classList.contains("hidden")) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      const pointer = new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+      raycaster.setFromCamera(pointer, camera);
+      const cartHit = raycaster.intersectObjects(visualCarts.map(item => item.hitbox), false)[0];
+      const productHit = raycaster.intersectObjects(productMeshes, false).find(item => item.instanceId !== undefined);
+      const tag = document.getElementById("hoverTag");
+      if (cartHit && (!productHit || cartHit.distance <= productHit.distance)) {
+        clearHoveredInstance();
+        const itemCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+        tag.textContent = itemCount ? "Your cart · " + itemCount + (itemCount === 1 ? " item" : " items") + " · click to view" : "Your cart · click to view";
+        tag.classList.add("show");
+        renderer.domElement.style.cursor = "pointer";
+        return;
+      }
+      const hit = productHit;
+      if (!hit) {
+        clearHoveredInstance();
+        tag.classList.remove("show");
+        renderer.domElement.style.cursor = "default";
+        return;
+      }
+      const product = products.find(item => item.id === instanceProductIds[hit.object.userData.kind][hit.instanceId]);
+      if (!product) {
+        clearHoveredInstance();
+        tag.classList.remove("show");
+        renderer.domElement.style.cursor = "default";
+        return;
+      }
+      if (!hoveredInstance || hoveredInstance.mesh !== hit.object || hoveredInstance.index !== hit.instanceId) {
+        clearHoveredInstance();
+        const originalColor = new THREE.Color();
+        hit.object.getColorAt(hit.instanceId, originalColor);
+        const highlight = new THREE.Color(product.color).lerp(new THREE.Color("#fff1a8"), .48);
+        hit.object.setColorAt(hit.instanceId, highlight);
+        hit.object.instanceColor.needsUpdate = true;
+        hoveredInstance = { mesh: hit.object, index: hit.instanceId, originalColor: originalColor };
+      }
+      tag.innerHTML = product.name + "<span>" + money(product.price) + "</span>";
+      tag.classList.add("show");
+      renderer.domElement.style.cursor = "pointer";
+    }
+
+    function clearHoveredInstance() {
+      if (!hoveredInstance) return;
+      hoveredInstance.mesh.setColorAt(hoveredInstance.index, hoveredInstance.originalColor);
+      hoveredInstance.mesh.instanceColor.needsUpdate = true;
+      hoveredInstance = null;
+    }
+
+    function pickProduct(clientX, clientY) {
+      if (!document.getElementById("startOverlay").classList.contains("hidden")) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      const pointer = new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+      raycaster.setFromCamera(pointer, camera);
+      const cartHit = raycaster.intersectObjects(visualCarts.map(item => item.hitbox), false)[0];
+      const productHit = raycaster.intersectObjects(productMeshes, false).find(item => item.instanceId !== undefined);
+      if (cartHit && (!productHit || cartHit.distance <= productHit.distance)) {
+        openCart();
+        return;
+      }
+      const hit = productHit;
+      if (!hit) return;
+      const product = products.find(item => item.id === instanceProductIds[hit.object.userData.kind][hit.instanceId]);
+      if (product) {
+        clearHoveredInstance();
+        openProduct(product);
+      }
+    }
+
+    function openProduct(product) {
+      selectedProduct = product;
+      document.getElementById("productCategory").textContent = product.category;
+      document.getElementById("productName").textContent = product.name;
+      document.getElementById("productDescription").textContent = product.description;
+      document.getElementById("productPrice").innerHTML = money(product.price) + ' <small>/ each</small>';
+      document.getElementById("productArt").style.background = product.color;
+      document.getElementById("productArt").style.borderRadius = product.kind === "sphere" ? "50%" : product.kind === "cylinder" ? "18px" : "7px 7px 10px 10px";
+      document.getElementById("productModal").classList.remove("hidden");
+      document.getElementById("addToCart").focus({ preventScroll: true });
+    }
+
+    function closeProduct() {
+      const wasOpen = !document.getElementById("productModal").classList.contains("hidden");
+      document.getElementById("productModal").classList.add("hidden");
+      selectedProduct = null;
+      if (wasOpen && renderer) renderer.domElement.focus({ preventScroll: true });
+    }
+
+    function onResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.fov = window.innerWidth <= 760 ? 78 : 67;
+      camera.updateProjectionMatrix();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), .05);
+      updateMovement(delta);
+      renderer.render(scene, camera);
+    }
+
+    // Cart state is validated against the current catalog before it is restored.
+    function loadCart() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(cartStorageKey) || "{}");
+        const valid = {};
+        products.forEach(product => {
+          const quantity = Number(saved[product.id]);
+          if (Number.isInteger(quantity) && quantity > 0) valid[product.id] = Math.min(quantity, 99);
+        });
+        return valid;
+      } catch (error) {
+        console.warn("Could not read the saved FreshMart cart.", error);
+        return {};
+      }
+    }
+
+    function saveCart() {
+      try {
+        localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+      } catch (error) {
+        console.warn("Could not save the FreshMart cart.", error);
+        showToast("Your cart couldn't be saved on this device");
+      }
+    }
+
+    function addToCart(productId) {
+      cart[productId] = Math.min((cart[productId] || 0) + 1, 99);
+      saveCart();
+      renderCart();
+      showToast("Added to your basket");
+    }
+
+    function changeQuantity(productId, amount) {
+      const next = (cart[productId] || 0) + amount;
+      if (next <= 0) delete cart[productId];
+      else cart[productId] = Math.min(next, 99);
+      saveCart();
+      renderCart();
+    }
+
+    function removeFromCart(productId) {
+      delete cart[productId];
+      saveCart();
+      renderCart();
+    }
+
+    function renderCart() {
+      const itemsRoot = document.getElementById("cartItems");
+      const entries = products.filter(product => cart[product.id]);
+      const count = entries.reduce((sum, product) => sum + cart[product.id], 0);
+      const total = entries.reduce((sum, product) => sum + product.price * cart[product.id], 0);
+      syncVisualCartContents(entries);
+      document.getElementById("cartCount").textContent = count;
+      document.getElementById("cartButton").setAttribute(
+        "aria-label",
+        count ? "Open shopping cart, " + count + (count === 1 ? " item" : " items") : "Open empty shopping cart"
+      );
+      document.getElementById("drawerItemCount").textContent = count ? "· " + count + (count === 1 ? " item" : " items") : "";
+      document.getElementById("cartTotal").textContent = money(total);
+      document.getElementById("checkoutButton").disabled = count === 0;
+      if (!entries.length) {
+        itemsRoot.innerHTML = '<div class="empty-cart"><div class="empty-cart-icon">🛍️</div><strong>Your basket is taking a breather</strong><span>Find a few fresh favorites to get started.</span></div>';
+        return;
+      }
+      itemsRoot.innerHTML = "";
+      entries.forEach(product => {
+        const line = document.createElement("div");
+        line.className = "cart-line";
+        line.innerHTML = '<div class="cart-line-art" style="color:' + product.color + '">' + product.emoji + '</div><div class="cart-line-info"><div class="cart-line-name">' + product.name + '</div><div class="cart-line-price">' + money(product.price) + '</div><div class="qty-control"><button type="button" aria-label="Decrease quantity">−</button><span>' + cart[product.id] + '</span><button type="button" aria-label="Increase quantity">+</button></div></div><button type="button" class="remove-button">Remove</button>';
+        const buttons = line.querySelectorAll(".qty-control button");
+        buttons[0].addEventListener("click", () => changeQuantity(product.id, -1));
+        buttons[1].addEventListener("click", () => changeQuantity(product.id, 1));
+        line.querySelector(".remove-button").addEventListener("click", () => removeFromCart(product.id));
+        itemsRoot.appendChild(line);
+      });
+    }
+
+    function syncVisualCartContents(entries) {
+      const visualCart = visualCarts[0];
+      if (!visualCart) return;
+      while (visualCart.contentGroup.children.length) {
+        const child = visualCart.contentGroup.children[0];
+        visualCart.contentGroup.remove(child);
+        child.geometry.dispose();
+        if (Array.isArray(child.material)) child.material.forEach(material => material.dispose());
+        else child.material.dispose();
+      }
+      let slot = 0;
+      entries.forEach(product => {
+        const visibleUnits = Math.min(cart[product.id], 3);
+        for (let i = 0; i < visibleUnits && slot < 8; i++, slot++) {
+          let geometry;
+          let y = 1.27;
+          if (product.kind === "sphere") geometry = new THREE.SphereGeometry(.13, 10, 8);
+          else if (product.kind === "cylinder") geometry = new THREE.CylinderGeometry(.1, .1, .3, 10);
+          else geometry = new THREE.BoxGeometry(.2, .3, .18);
+          const item = new THREE.Mesh(geometry, standard(product.color, .48));
+          item.position.set(-.3 + (slot % 4) * .2, y + (slot % 2) * .035, -.2 + Math.floor(slot / 4) * .3);
+          item.castShadow = true;
+          visualCart.contentGroup.add(item);
+        }
+      });
+    }
+
+    function openCart() {
+      closeCategoryDrawer();
+      const drawer = document.getElementById("cartDrawer");
+      document.getElementById("drawerScrim").classList.add("open");
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+      drawer.removeAttribute("inert");
+      document.getElementById("cartButton").setAttribute("aria-expanded", "true");
+      document.getElementById("drawerClose").focus({ preventScroll: true });
+    }
+    function closeCart() {
+      const drawer = document.getElementById("cartDrawer");
+      const wasOpen = drawer.classList.contains("open");
+      document.getElementById("drawerScrim").classList.remove("open");
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+      drawer.setAttribute("inert", "");
+      document.getElementById("cartButton").setAttribute("aria-expanded", "false");
+      if (wasOpen) document.getElementById("cartButton").focus({ preventScroll: true });
+    }
+
+    function openCheckout() {
+      if (!Object.keys(cart).length) return;
+      closeCart();
+      document.getElementById("successState").classList.remove("show");
+      document.getElementById("checkoutFields").style.display = "";
+      document.getElementById("checkoutForm").reset();
+      document.getElementById("formError").classList.remove("show");
+      const entries = products.filter(product => cart[product.id]);
+      const total = entries.reduce((sum, product) => sum + product.price * cart[product.id], 0);
+      document.getElementById("orderSummary").innerHTML =
+        '<div><span>' + entries.reduce((sum, product) => sum + cart[product.id], 0) + ' items</span><span>' + money(total) + '</span></div><div><span>Delivery</span><span>Calculated at checkout</span></div>';
+      document.getElementById("checkoutModal").classList.remove("hidden");
+      document.querySelector('#checkoutForm input[name="name"]').focus({ preventScroll: true });
+    }
+    function closeCheckout() {
+      const modal = document.getElementById("checkoutModal");
+      const wasOpen = !modal.classList.contains("hidden");
+      modal.classList.add("hidden");
+      if (wasOpen) document.getElementById("cartButton").focus({ preventScroll: true });
+    }
+
+    function submitOrder(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) {
+        document.getElementById("formError").classList.add("show");
+        return;
+      }
+      const name = new FormData(form).get("name").toString().trim();
+      if (name.length < 2) {
+        document.getElementById("formError").classList.add("show");
+        return;
+      }
+      document.getElementById("formError").classList.remove("show");
+      document.getElementById("checkoutFields").style.display = "none";
+      document.getElementById("successMessage").textContent = "Thanks, " + name.split(/\s+/)[0] + "! Payment received and your receipt is ready. Exit through the Home path whenever you are ready.";
+      document.getElementById("successState").classList.add("show");
+      cart = {};
+      saveCart();
+      renderCart();
+      document.getElementById("doneButton").focus({ preventScroll: true });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    // Optional soft ambient tone; it only starts after the visitor opts in.
+    function toggleAmbience() {
+      if (!audio.context) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) { showToast("Ambient audio isn't available in this browser"); return; }
+        audio.context = new AudioContext();
+        audio.oscillator = audio.context.createOscillator();
+        audio.gain = audio.context.createGain();
+        audio.oscillator.type = "sine";
+        audio.oscillator.frequency.value = 110;
+        audio.gain.gain.value = 0;
+        audio.oscillator.connect(audio.gain);
+        audio.gain.connect(audio.context.destination);
+        audio.oscillator.start();
+      }
+      audio.enabled = !audio.enabled;
+      audio.context.resume();
+      audio.gain.gain.setTargetAtTime(audio.enabled ? .012 : 0, audio.context.currentTime, .2);
+      document.getElementById("soundIcon").innerHTML = audio.enabled
+        ? '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>'
+        : '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>';
+    }
+
+    function start() {
+      if (!window.THREE) {
+        document.getElementById("loader").classList.add("done");
+        document.getElementById("errorMessage").classList.add("show");
+        return;
+      }
+      try {
+        initScene();
+      } catch (error) {
+        console.error("FreshMart 3D could not initialize.", error);
+        document.getElementById("loader").classList.add("done");
+        document.getElementById("errorMessage").classList.add("show");
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>
