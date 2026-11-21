@@ -805,54 +805,61 @@
       { name: "Pet Supplies", icon: "🐾", color: "#7c9a58", position: [5.2, -21] }
     ];
     const products = [
-      { id: "avocado", name: "Creamy Avocados", price: 2.49, category: "Fruits & Vegetables", color: "#5b9e46", kind: "sphere", description: "Ripe, buttery avocados picked at their peak. Perfect on toast or straight from the skin.", emoji: "🥑" },
-      { id: "strawberries", name: "Sweet Strawberries", price: 3.29, category: "Fruits & Vegetables", color: "#e95d54", kind: "sphere", description: "Bright, juicy berries with a lovely natural sweetness. A little sunshine in every bite.", emoji: "🍓" },
-      { id: "oranges", name: "Sunshine Oranges", price: 1.89, category: "Fruits & Vegetables", color: "#f39b45", kind: "sphere", description: "Citrusy, easy-peel oranges full of fresh flavor and a little morning-day magic.", emoji: "🍊" },
-      { id: "carrots", name: "Garden Carrots", price: 1.59, category: "Fruits & Vegetables", color: "#f18736", kind: "cylinder", description: "Crunchy, sweet carrots grown in good soil and ready for your favorite recipes.", emoji: "🥕" },
-      { id: "bananas", name: "Golden Bananas", price: 2.19, category: "Fruits & Vegetables", color: "#efce4a", kind: "cylinder", description: "Naturally sweet bananas, picked ripe and ready for breakfast or a quick snack.", emoji: "🍌" },
-      { id: "blueberries", name: "Blueberry Bunches", price: 4.29, category: "Fruits & Vegetables", color: "#587bc0", kind: "sphere", description: "Plump, juicy blueberries packed with bright berry flavor.", emoji: "🫐" },
-      { id: "red-apples", name: "Crisp Red Apples", price: 2.29, category: "Fruits & Vegetables", color: "#d94d45", kind: "sphere", description: "Crunchy red apples with a naturally sweet finish.", emoji: "🍎" },
-      { id: "baby-spinach", name: "Fresh Baby Spinach", price: 3.19, category: "Fruits & Vegetables", color: "#4f9b55", kind: "box", description: "Tender baby spinach leaves for salads and everyday meals.", emoji: "🥬" },
-      { id: "oat-milk", name: "Oat Milk", price: 3.79, category: "Dairy", color: "#d9c198", kind: "box", description: "Smooth, creamy oat milk with a naturally mellow taste. Lovely in coffee, cereal, or on its own.", emoji: "🥛" },
-      { id: "farm-milk", name: "Whole Farm Milk", price: 4.19, category: "Dairy", color: "#e9f2f1", kind: "box", description: "Fresh whole milk from happy local farms. Rich, comforting, and wonderfully versatile.", emoji: "🥛" },
-      { id: "cheddar", name: "Mild Cheddar", price: 4.79, category: "Dairy", color: "#f3bd46", kind: "box", description: "A smooth, mellow cheddar that's made for toasties, cheese boards, and sneaky slices.", emoji: "🧀" },
-      { id: "yogurt", name: "Greek Yogurt", price: 2.99, category: "Dairy", color: "#f3efdf", kind: "cylinder", description: "Thick and creamy Greek-style yogurt. Add fresh fruit, honey, or just grab a spoon.", emoji: "🥣" },
-      { id: "salted-butter", name: "Creamy Salted Butter", price: 4.49, category: "Dairy", color: "#efc94e", kind: "box", description: "Rich, creamy butter with a pinch of salt for toast and cooking.", emoji: "🧈" },
-      { id: "berry-yogurt", name: "Berry Yogurt Cups", price: 3.49, category: "Dairy", color: "#dd6d91", kind: "cylinder", description: "Smooth yogurt swirled with sweet, tangy berries in handy single cups.", emoji: "🍓" },
-      { id: "cream-cheese", name: "Creamy Cream Cheese", price: 3.89, category: "Dairy", color: "#eeeada", kind: "box", description: "Smooth, spreadable cream cheese for bagels and baking.", emoji: "🧀" },
-      { id: "vanilla-custard", name: "Vanilla Custard", price: 3.59, category: "Dairy", color: "#eadba4", kind: "cylinder", description: "Silky vanilla custard with a rich, comforting flavor.", emoji: "🍮" },
-      { id: "sourdough", name: "Country Sourdough", price: 5.49, category: "Bakery", color: "#bc7847", kind: "box", description: "Golden, crusty sourdough with a soft center and slow-fermented flavor.", emoji: "🍞" },
-      { id: "croissants", name: "Butter Croissants", price: 4.29, category: "Bakery", color: "#e5aa54", kind: "sphere", description: "Flaky, golden layers with real butter. Your weekend breakfast just called.", emoji: "🥐" },
-      { id: "blueberry-muffins", name: "Blueberry Muffins", price: 4.59, category: "Bakery", color: "#8e79b7", kind: "cylinder", description: "Soft-baked muffins bursting with blueberries. Fresh from our neighborhood bakery.", emoji: "🫐" },
-      { id: "bagels", name: "Everything Bagels", price: 3.99, category: "Bakery", color: "#ca8e50", kind: "cylinder", description: "Chewy, toasty bagels finished with a savory everything seasoning.", emoji: "🥯" },
-      { id: "cinnamon-rolls", name: "Cinnamon Swirl Rolls", price: 4.79, category: "Bakery", color: "#bb7541", kind: "cylinder", description: "Soft, golden rolls layered with cinnamon and a sweet glaze.", emoji: "🍥" },
-      { id: "brioche", name: "Golden Brioche Loaf", price: 4.99, category: "Bakery", color: "#dfa64e", kind: "box", description: "A tender, buttery loaf with a delicate golden crust.", emoji: "🍞" },
-      { id: "sesame-baguette", name: "Sesame Baguette", price: 3.79, category: "Bakery", color: "#c58a4f", kind: "cylinder", description: "A crisp baguette topped with toasted sesame seeds.", emoji: "🥖" },
-      { id: "chocolate-danish", name: "Chocolate Danish", price: 4.49, category: "Bakery", color: "#8d5b42", kind: "box", description: "Flaky pastry filled with smooth chocolate.", emoji: "🥐" },
-      { id: "granola", name: "Honey Granola", price: 5.29, category: "Snacks", color: "#d8a34c", kind: "box", description: "Toasty oats, crunchy nuts, and a touch of honey for snack breaks or breakfast bowls.", emoji: "🥣" },
-      { id: "popcorn", name: "Sea Salt Popcorn", price: 2.49, category: "Snacks", color: "#f3c457", kind: "box", description: "Light, fluffy popcorn with a pinch of sea salt. Movie night made a little better.", emoji: "🍿" },
-      { id: "dark-chocolate", name: "Dark Chocolate", price: 3.69, category: "Snacks", color: "#72504a", kind: "box", description: "A rich, silky dark chocolate bar for your well-deserved little moment.", emoji: "🍫" },
-      { id: "almonds", name: "Roasted Almonds", price: 6.49, category: "Snacks", color: "#b48759", kind: "cylinder", description: "Crunchy roasted almonds, lightly seasoned and ready for the snack drawer.", emoji: "🥜" },
-      { id: "pretzels", name: "Crunchy Pretzel Twists", price: 3.19, category: "Snacks", color: "#c88445", kind: "box", description: "Oven-baked pretzel twists with a crisp bite and a little sea salt.", emoji: "🥨" },
-      { id: "trail-mix", name: "Berry Trail Mix", price: 5.79, category: "Snacks", color: "#a87255", kind: "cylinder", description: "A cheerful mix of nuts, fruit, and chocolate for on-the-go energy.", emoji: "🥜" },
-      { id: "cheese-crackers", name: "Cheddar Crackers", price: 3.59, category: "Snacks", color: "#edb94d", kind: "box", description: "Crunchy bite-size crackers with bold cheddar flavor.", emoji: "🧀" },
-      { id: "fruit-chews", name: "Mixed Fruit Chews", price: 2.99, category: "Snacks", color: "#d97592", kind: "box", description: "Soft fruity chews in a colorful assortment.", emoji: "🍬" },
-      { id: "sparkling-water", name: "Sparkling Water", price: 1.49, category: "Beverages", color: "#6ac9c6", kind: "cylinder", description: "Crisp, refreshing bubbles with no added sugar. A bright little pick-me-up.", emoji: "💧" },
-      { id: "orange-juice", name: "Orange Juice", price: 3.89, category: "Beverages", color: "#f6a442", kind: "box", description: "A cheerful glass of 100% orange juice, pressed from sun-ripened fruit.", emoji: "🍊" },
-      { id: "cold-brew", name: "Vanilla Cold Brew", price: 4.99, category: "Beverages", color: "#77564c", kind: "cylinder", description: "Slow-steeped coffee with a soft vanilla finish. Smooth energy for wherever today goes.", emoji: "☕" },
-      { id: "green-tea", name: "Garden Green Tea", price: 3.49, category: "Beverages", color: "#75a86b", kind: "box", description: "Delicate green tea with a fresh, clean finish. A calming cup, any time of day.", emoji: "🍵" },
-      { id: "cola", name: "Classic Cola", price: 2.29, category: "Beverages", color: "#813f38", kind: "cylinder", description: "A cool, fizzy classic in a grab-and-go can.", emoji: "🥤" },
-      { id: "apple-juice", name: "Crisp Apple Juice", price: 3.29, category: "Beverages", color: "#b7ba45", kind: "box", description: "Bright apple juice with a crisp, naturally sweet finish.", emoji: "🧃" },
-      { id: "berry-smoothie", name: "Berry Breakfast Smoothie", price: 4.49, category: "Beverages", color: "#9c5e90", kind: "cylinder", description: "A chilled blend of berries and yogurt for a quick breakfast.", emoji: "🥤" },
-      { id: "peach-iced-tea", name: "Peach Iced Tea", price: 2.79, category: "Beverages", color: "#e49c66", kind: "cylinder", description: "Refreshing iced tea with a mellow peach finish.", emoji: "🍑" },
-      { id: "dish-soap", name: "Lemon Dish Soap", price: 3.99, category: "Household", color: "#e8d349", kind: "cylinder", description: "A hardworking, plant-based dish soap with a bright lemon scent.", emoji: "🍋" },
-      { id: "laundry", name: "Fresh Laundry Wash", price: 8.99, category: "Household", color: "#86b3d2", kind: "box", description: "Gentle on fabrics and tough on everyday mess, with a lovely clean-linen scent.", emoji: "🫧" },
-      { id: "paper-towels", name: "Soft Paper Towels", price: 5.79, category: "Household", color: "#e7e5d7", kind: "cylinder", description: "Strong, soft, and ready for life's little spills. Made with responsibly sourced paper.", emoji: "🧻" },
-      { id: "hand-soap", name: "Citrus Hand Soap", price: 4.49, category: "Household", color: "#efad70", kind: "cylinder", description: "A gentle foaming hand soap with a fresh citrus scent and aloe for soft hands.", emoji: "🧴" },
-      { id: "glass-cleaner", name: "Fresh Glass Cleaner", price: 4.29, category: "Household", color: "#54a9cb", kind: "cylinder", description: "A streak-free cleaner for sparkling windows and shiny surfaces.", emoji: "🧽" },
-      { id: "trash-bags", name: "Strong Kitchen Bags", price: 6.29, category: "Household", color: "#77878e", kind: "box", description: "Tough, dependable bags for everyday kitchen cleanups.", emoji: "🗑️" },
-      { id: "fabric-softener", name: "Fresh Fabric Softener", price: 7.49, category: "Household", color: "#8db8d8", kind: "box", description: "Softens clothes and leaves a light clean fragrance.", emoji: "👕" },
-      { id: "surface-wipes", name: "Multipurpose Surface Wipes", price: 4.99, category: "Household", color: "#83bca1", kind: "box", description: "Convenient wipes for quick everyday surface cleaning.", emoji: "🧽" },
+      { id: "apple", name: "Apple", price: 1.20, category: "Fruits & Vegetables", color: "#e63946", kind: "sphere", description: "Crisp, juicy apples with a naturally sweet finish.", emoji: "🍎" },
+      { id: "banana", name: "Banana", price: 0.60, category: "Fruits & Vegetables", color: "#efce4a", kind: "cylinder", description: "Naturally sweet bananas, ready for breakfast or a quick snack.", emoji: "🍌" },
+      { id: "orange", name: "Orange", price: 0.90, category: "Fruits & Vegetables", color: "#f39b45", kind: "sphere", description: "Juicy, easy-peel oranges with bright citrus flavor.", emoji: "🍊" },
+      { id: "grapes", name: "Grapes", price: 2.50, category: "Fruits & Vegetables", color: "#7750a4", kind: "sphere", description: "Sweet, fresh grapes that are perfect for sharing.", emoji: "🍇" },
+      { id: "watermelon", name: "Watermelon", price: 4.99, category: "Fruits & Vegetables", color: "#e75b65", kind: "sphere", description: "Refreshing, juicy watermelon with a crisp bite.", emoji: "🍉" },
+      { id: "mango", name: "Mango", price: 1.79, category: "Fruits & Vegetables", color: "#e7a43c", kind: "sphere", description: "Ripe, fragrant mango with a sweet tropical flavor.", emoji: "🥭" },
+      { id: "tomato", name: "Tomato", price: 0.80, category: "Fruits & Vegetables", color: "#cf5547", kind: "sphere", description: "Ripe, flavorful tomatoes for salads, sauces, and everyday meals.", emoji: "🍅" },
+      { id: "carrot", name: "Carrot", price: 0.50, category: "Fruits & Vegetables", color: "#f18736", kind: "cylinder", description: "Crunchy, sweet carrots grown for your favorite recipes.", emoji: "🥕" },
+      { id: "potato", name: "Potato", price: 0.70, category: "Fruits & Vegetables", color: "#b88b5a", kind: "sphere", description: "Versatile, hearty potatoes for roasting, mashing, or frying.", emoji: "🥔" },
+      { id: "onion", name: "Onion", price: 0.60, category: "Fruits & Vegetables", color: "#b58a68", kind: "sphere", description: "Fresh onions that add savory flavor to everyday cooking.", emoji: "🧅" },
+      { id: "broccoli", name: "Broccoli", price: 1.49, category: "Fruits & Vegetables", color: "#4f9b55", kind: "sphere", description: "Fresh green broccoli florets, full of garden-fresh flavor.", emoji: "🥦" },
+      { id: "spinach", name: "Spinach", price: 1.29, category: "Fruits & Vegetables", color: "#377c49", kind: "box", description: "Tender spinach leaves for salads, smoothies, and everyday meals.", emoji: "🥬" },
+      { id: "milk", name: "Milk", price: 2.49, category: "Dairy", color: "#e9f2f1", kind: "box", description: "Fresh, creamy milk for cereal, coffee, or a glass on its own.", emoji: "🥛" },
+      { id: "cheese", name: "Cheese", price: 3.79, category: "Dairy", color: "#f3bd46", kind: "box", description: "Smooth, savory cheese for sandwiches, snacks, and cooking.", emoji: "🧀" },
+      { id: "butter", name: "Butter", price: 3.49, category: "Dairy", color: "#efc94e", kind: "box", description: "Rich, creamy butter for toast, baking, and cooking.", emoji: "🧈" },
+      { id: "yogurt", name: "Yogurt", price: 1.99, category: "Dairy", color: "#f3efdf", kind: "cylinder", description: "Cool, creamy yogurt for breakfast or a refreshing snack.", emoji: "🥣" },
+      { id: "paneer", name: "Paneer", price: 4.29, category: "Dairy", color: "#f2e7cb", kind: "box", description: "Fresh paneer, ready for curries, grilling, and quick meals.", emoji: "🧀" },
+      { id: "cream", name: "Cream", price: 2.99, category: "Dairy", color: "#eeeada", kind: "cylinder", description: "Smooth, rich cream for desserts, sauces, and coffee.", emoji: "🥛" },
+      { id: "eggs", name: "Eggs", price: 2.79, category: "Dairy", color: "#e9d9b8", kind: "box", description: "Farm-fresh eggs for breakfast, baking, and everyday recipes.", emoji: "🥚" },
+      { id: "ice-cream", name: "Ice Cream", price: 4.49, category: "Dairy", color: "#eadbb7", kind: "cylinder", description: "Silky, creamy ice cream for scoops, sundaes, and smiles.", emoji: "🍦" },
+      { id: "bread-loaf", name: "Bread Loaf", price: 2.49, category: "Bakery", color: "#bc7847", kind: "box", description: "Soft, freshly baked bread with a golden crust.", emoji: "🍞" },
+      { id: "croissant", name: "Croissant", price: 2.29, category: "Bakery", color: "#e5aa54", kind: "sphere", description: "Flaky, golden pastry baked with buttery layers.", emoji: "🥐" },
+      { id: "bagel", name: "Bagel", price: 1.79, category: "Bakery", color: "#ca8e50", kind: "cylinder", description: "Chewy, toasty bagels for a satisfying breakfast or sandwich.", emoji: "🥯" },
+      { id: "cupcake", name: "Cupcake", price: 2.49, category: "Bakery", color: "#d878a4", kind: "cylinder", description: "A soft, sweet cupcake topped with fluffy frosting.", emoji: "🧁" },
+      { id: "cookies", name: "Cookies", price: 3.29, category: "Bakery", color: "#a87953", kind: "box", description: "Golden-baked cookies with a crisp edge and soft center.", emoji: "🍪" },
+      { id: "cake", name: "Cake", price: 5.99, category: "Bakery", color: "#d98191", kind: "box", description: "A tender, celebration-ready cake with a sweet finish.", emoji: "🎂" },
+      { id: "burger-buns", name: "Burger Buns", price: 2.99, category: "Bakery", color: "#dfa64e", kind: "box", description: "Soft, lightly toasted buns made for your favorite burgers.", emoji: "🍔" },
+      { id: "donut", name: "Donut", price: 1.49, category: "Bakery", color: "#ce8d68", kind: "cylinder", description: "A fluffy, freshly baked donut for a sweet treat.", emoji: "🍩" },
+      { id: "potato-chips", name: "Potato Chips", price: 2.49, category: "Snacks", color: "#e9bd50", kind: "box", description: "Crispy, golden potato chips for a crunchy snack break.", emoji: "🥔" },
+      { id: "popcorn", name: "Popcorn", price: 2.29, category: "Snacks", color: "#f3c457", kind: "box", description: "Light, fluffy popcorn with a satisfying crunch.", emoji: "🍿" },
+      { id: "peanuts", name: "Peanuts", price: 2.79, category: "Snacks", color: "#b48759", kind: "cylinder", description: "Crunchy peanuts for an easy, savory snack.", emoji: "🥜" },
+      { id: "biscuits", name: "Biscuits", price: 2.49, category: "Snacks", color: "#c99b66", kind: "box", description: "Crisp, golden biscuits to enjoy with tea or anytime.", emoji: "🍪" },
+      { id: "chocolate-bar", name: "Chocolate Bar", price: 2.99, category: "Snacks", color: "#72504a", kind: "box", description: "A smooth, rich chocolate bar for a little treat.", emoji: "🍫" },
+      { id: "namkeen", name: "Namkeen", price: 2.29, category: "Snacks", color: "#d38b42", kind: "box", description: "A crunchy, savory namkeen mix with a lively spice blend.", emoji: "🥨" },
+      { id: "granola-bar", name: "Granola Bar", price: 1.99, category: "Snacks", color: "#d8a34c", kind: "box", description: "Toasty oats and a touch of sweetness in a handy snack bar.", emoji: "🌾" },
+      { id: "crackers", name: "Crackers", price: 2.49, category: "Snacks", color: "#edb94d", kind: "box", description: "Light, crisp crackers for snacking or pairing with cheese.", emoji: "🧀" },
+      { id: "dried-fruits", name: "Dried Fruits", price: 4.99, category: "Snacks", color: "#a87255", kind: "cylinder", description: "A naturally sweet mix of dried fruits for snacking on the go.", emoji: "🍇" },
+      { id: "water-bottle", name: "Water Bottle", price: 1.29, category: "Beverages", color: "#6ac9c6", kind: "cylinder", description: "A refreshing bottle of crisp, still water for wherever you go.", emoji: "💧" },
+      { id: "orange-juice", name: "Orange Juice", price: 3.49, category: "Beverages", color: "#f6a442", kind: "box", description: "Bright, refreshing juice pressed from sun-ripened oranges.", emoji: "🧃" },
+      { id: "cola", name: "Cola", price: 1.99, category: "Beverages", color: "#813f38", kind: "cylinder", description: "A cool, fizzy cola for a refreshing pick-me-up.", emoji: "🥤" },
+      { id: "coffee", name: "Coffee", price: 4.49, category: "Beverages", color: "#77564c", kind: "cylinder", description: "Rich, aromatic coffee to start the day or enjoy any time.", emoji: "☕" },
+      { id: "tea", name: "Tea", price: 3.29, category: "Beverages", color: "#75a86b", kind: "box", description: "A fragrant tea blend for a comforting cup, hot or iced.", emoji: "🍵" },
+      { id: "energy-drink", name: "Energy Drink", price: 2.99, category: "Beverages", color: "#75b94b", kind: "cylinder", description: "A chilled, sparkling energy drink for a refreshing boost.", emoji: "⚡" },
+      { id: "coconut-water", name: "Coconut Water", price: 2.79, category: "Beverages", color: "#8ebf73", kind: "cylinder", description: "Light, refreshing coconut water with a naturally mellow taste.", emoji: "🥥" },
+      { id: "lemonade", name: "Lemonade", price: 2.49, category: "Beverages", color: "#e8d349", kind: "cylinder", description: "Bright, sweet-tart lemonade served chilled.", emoji: "🍋" },
+      { id: "milkshake", name: "Milkshake", price: 3.99, category: "Beverages", color: "#d99aaf", kind: "cylinder", description: "A smooth, creamy milkshake for a cool, sweet treat.", emoji: "🥤" },
+      { id: "soap", name: "Soap", price: 1.49, category: "Household", color: "#efad70", kind: "box", description: "A gentle everyday soap with a fresh, clean feel.", emoji: "🧼" },
+      { id: "detergent", name: "Detergent", price: 6.99, category: "Household", color: "#86b3d2", kind: "box", description: "A hardworking laundry detergent for fresh, clean clothes.", emoji: "🫧" },
+      { id: "dish-wash-liquid", name: "Dish Wash Liquid", price: 3.49, category: "Household", color: "#e8d349", kind: "cylinder", description: "A fresh-scented dish liquid that cuts through everyday grease.", emoji: "🧴" },
+      { id: "sponge", name: "Sponge", price: 1.29, category: "Household", color: "#83bca1", kind: "box", description: "A handy kitchen sponge for washing dishes and wiping surfaces.", emoji: "🧽" },
+      { id: "toilet-cleaner", name: "Toilet Cleaner", price: 3.99, category: "Household", color: "#54a9cb", kind: "cylinder", description: "A reliable cleaner to keep bathrooms fresh and sparkling.", emoji: "🧴" },
+      { id: "tissue-paper", name: "Tissue Paper", price: 2.49, category: "Household", color: "#e7e5d7", kind: "cylinder", description: "Soft, everyday tissues for home, work, or on the go.", emoji: "🧻" },
+      { id: "trash-bags", name: "Trash Bags", price: 4.99, category: "Household", color: "#77878e", kind: "box", description: "Strong, dependable trash bags for everyday cleanups.", emoji: "🗑️" },
+      { id: "air-freshener", name: "Air Freshener", price: 3.49, category: "Household", color: "#a992d1", kind: "cylinder", description: "A fresh, clean fragrance to brighten your home.", emoji: "🌸" },
+      { id: "floor-cleaner", name: "Floor Cleaner", price: 4.49, category: "Household", color: "#72b7ae", kind: "cylinder", description: "An effective floor cleaner that leaves a fresh finish.", emoji: "🧹" },
       { id: "frozen-peas", name: "Garden Sweet Peas", price: 3.49, category: "Frozen Foods", color: "#67a74f", kind: "box", description: "Sweet garden peas frozen at their freshest for quick, easy meals.", emoji: "🫛" },
       { id: "frozen-pizza", name: "Stone-Baked Pizza", price: 7.99, category: "Frozen Foods", color: "#d75e45", kind: "box", description: "A crisp stone-baked crust topped with tomato and stretchy cheese.", emoji: "🍕" },
       { id: "vanilla-ice-cream", name: "Vanilla Bean Ice Cream", price: 5.49, category: "Frozen Foods", color: "#eadbb7", kind: "cylinder", description: "Silky vanilla bean ice cream for scoops, sundaes, and smiles.", emoji: "🍨" },
@@ -903,6 +910,10 @@
       { id: "pet-ball", name: "Bouncy Pet Ball", price: 3.99, category: "Pet Supplies", color: "#62aeca", kind: "sphere", description: "A colorful, lightweight ball for indoor and outdoor play.", emoji: "🎾" }
     ];
 
+    function getRackSpacing(productCount) {
+      return productCount > 6 ? Math.min(.78, 5.3 / (productCount - 1)) : .95;
+    }
+
     const money = value => "$" + value.toFixed(2);
     const cartStorageKey = "freshmart3d-cart-v1";
     let cart = loadCart();
@@ -921,6 +932,7 @@
     let toastTimer;
     const keys = new Set();
     const visualCarts = [];
+    let flyingProductItems = [];
     const audio = { context: null, oscillator: null, gain: null, enabled: false };
     const sceneRoot = document.getElementById("scene");
 
@@ -1183,7 +1195,7 @@
         const levels = [.93, 1.73, 2.53];
         levels.forEach((y, levelIndex) => {
           for (let facingIndex = 0; facingIndex < 2; facingIndex++) {
-            const rackSpacing = categoryProducts.length > 6 ? .78 : .95;
+            const rackSpacing = getRackSpacing(categoryProducts.length);
             const localX = (shelfSlot - (categoryProducts.length - 1) / 2) * rackSpacing + (facingIndex ? .23 : -.23);
             const localZ = (levelIndex - 1) * .08;
             const x = category.position[0] + Math.cos(facing) * localX + Math.sin(facing) * localZ;
@@ -1357,15 +1369,23 @@
 
       // Long lower chassis and high rear handle.
       addRod([-.49, .69, -.47], [.49, .69, -.47], .045, orange);
-      addRod([-.49, .69, -.47], [-.49, .25, .48], .045, orange);
-      addRod([.49, .69, -.47], [.49, .25, .48], .045, orange);
-      addRod([-.49, .25, .48], [.49, .25, .48], .045, orange);
-      addRod([-.49, .25, .48], [-.49, .35, .82], .045, orange);
-      addRod([.49, .25, .48], [.49, .35, .82], .045, orange);
-      addRod([-.49, .35, .82], [.49, .35, .82], .05, orange);
-      addRod([-.49, 1.52, .47], [-.49, 2.02, .94], .05, orange);
-      addRod([.49, 1.52, .47], [.49, 2.02, .94], .05, orange);
-      addRod([-.49, 2.02, .94], [.49, 2.02, .94], .065, orange);
+      addRod([-.49, .69, -.47], [-.49, .25, -.48], .045, orange);
+      addRod([.49, .69, -.47], [.49, .25, -.48], .045, orange);
+      addRod([-.49, .25, -.48], [.49, .25, -.48], .045, orange);
+      addRod([-.49, .25, -.48], [-.49, .35, -.82], .045, orange);
+      addRod([.49, .25, -.48], [.49, .35, -.82], .045, orange);
+      addRod([-.49, .35, -.82], [.49, .35, -.82], .05, orange);
+      addRod([-.49, 1.52, -.47], [-.49, 2.02, -.94], .05, orange);
+      addRod([.49, 1.52, -.47], [.49, 2.02, -.94], .05, orange);
+      addRod([-.49, 2.02, -.94], [.49, 2.02, -.94], .065, orange);
+
+      // Cart legs from the lower frame to the wheel mounts.
+      [-.49, .49].forEach(dx => {
+        [-.31, .54].forEach(wheelZ => {
+          const legTopZ = wheelZ < 0 ? -.42 : .48;
+          addRod([dx, .48, legTopZ], [dx, .18, wheelZ], .035, orange);
+        });
+      });
 
       const wheels = [];
       [-.49, .49].forEach(dx => [-.31, .54].forEach(wheelZ => {
@@ -1621,7 +1641,7 @@
       const productIndex = targetProduct ? products.filter(p => p.category === categoryName).findIndex(p => p.id === targetProduct.id) : 0;
       const facing = category.position[0] < 0 ? Math.PI / 2 : -Math.PI / 2;
       const categoryProductCount = products.filter(p => p.category === categoryName).length;
-      const rackSpacing = categoryProductCount > 6 ? .78 : .95;
+      const rackSpacing = getRackSpacing(categoryProductCount);
       const localOffset = targetProduct ? (productIndex - (categoryProductCount - 1) / 2) * rackSpacing : 0;
       const targetZ = category.position[1] - Math.sin(facing) * localOffset;
       const destination = new THREE.Vector3(0, 1.68, targetZ + 3.5);
@@ -1920,6 +1940,7 @@
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), .05);
       updateMovement(delta);
+      updateFlyingProductItems(delta);
       renderer.render(scene, camera);
     }
 
@@ -1951,6 +1972,8 @@
     function addToCart(productId) {
       cart[productId] = Math.min((cart[productId] || 0) + 1, 99);
       saveCart();
+      const product = products.find(item => item.id === productId);
+      if (product) startProductFlight(product);
       renderCart();
       showToast("Added to your basket");
     }
@@ -1974,7 +1997,7 @@
       const entries = products.filter(product => cart[product.id]);
       const count = entries.reduce((sum, product) => sum + cart[product.id], 0);
       const total = entries.reduce((sum, product) => sum + product.price * cart[product.id], 0);
-      syncVisualCartContents(entries);
+      if (!flyingProductItems.length) syncVisualCartContents(entries);
       document.getElementById("cartCount").textContent = count;
       document.getElementById("cartButton").setAttribute(
         "aria-label",
@@ -1998,6 +2021,78 @@
         line.querySelector(".remove-button").addEventListener("click", () => removeFromCart(product.id));
         itemsRoot.appendChild(line);
       });
+    }
+
+    function startProductFlight(product) {
+      const visualCart = visualCarts[0];
+      let startPosition = null;
+      let startRotation = null;
+      let nearestDistance = Infinity;
+      const instanceMatrix = new THREE.Matrix4();
+      productMeshes.forEach(mesh => {
+        const productIds = instanceProductIds[mesh.userData.kind] || [];
+        productIds.forEach((id, index) => {
+          if (id !== product.id) return;
+          mesh.getMatrixAt(index, instanceMatrix);
+          const position = new THREE.Vector3().setFromMatrixPosition(instanceMatrix);
+          mesh.localToWorld(position);
+          const distance = position.distanceToSquared(camera.position);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            startPosition = position;
+            startRotation = new THREE.Quaternion().setFromRotationMatrix(instanceMatrix);
+          }
+        });
+      });
+      if (!visualCart || !startPosition) return false;
+
+      let geometry;
+      if (product.kind === "sphere") geometry = new THREE.SphereGeometry(.22, 12, 9);
+      else if (product.kind === "cylinder") geometry = new THREE.CylinderGeometry(.19, .19, .56, 12);
+      else geometry = new THREE.BoxGeometry(.44, .55, .4);
+      const mesh = new THREE.Mesh(geometry, standard(product.color, .48));
+      mesh.position.copy(startPosition);
+      mesh.quaternion.copy(startRotation);
+      mesh.castShadow = true;
+      scene.add(mesh);
+
+      const slot = Math.min(visualCart.contentGroup.children.length + flyingProductItems.length, 7);
+      flyingProductItems.push({
+        mesh: mesh,
+        startPosition: startPosition,
+        targetPosition: new THREE.Vector3(
+          -.3 + (slot % 4) * .2,
+          1.27 + (slot % 2) * .035,
+          -.2 + Math.floor(slot / 4) * .3
+        ),
+        elapsed: 0,
+        duration: .72
+      });
+      return true;
+    }
+
+    function updateFlyingProductItems(delta) {
+      if (!flyingProductItems.length) return;
+      for (let index = flyingProductItems.length - 1; index >= 0; index--) {
+        const flight = flyingProductItems[index];
+        flight.elapsed += delta;
+        const progress = Math.min(flight.elapsed / flight.duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const target = visualCarts[0].group.localToWorld(flight.targetPosition.clone());
+        flight.mesh.position.lerpVectors(flight.startPosition, target, eased);
+        flight.mesh.position.y += Math.sin(progress * Math.PI) * .85;
+        flight.mesh.rotation.y += delta * 4;
+        flight.mesh.scale.setScalar(1 - eased * .6);
+        if (progress === 1) {
+          scene.remove(flight.mesh);
+          flight.mesh.geometry.dispose();
+          flight.mesh.material.dispose();
+          flyingProductItems.splice(index, 1);
+        }
+      }
+      if (!flyingProductItems.length) {
+        syncVisualCartContents(products.filter(product => cart[product.id]));
+      }
     }
 
     function syncVisualCartContents(entries) {
